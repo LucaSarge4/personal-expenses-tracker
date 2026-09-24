@@ -46,9 +46,16 @@ source of truth; `CLAUDE.md` just points here.
   settings, the transactions list envelope), which `openapi-typescript`
   can't type precisely.
 - `frontend/src/api/hooks.ts` — all TanStack Query hooks, one per endpoint.
-- `frontend/src/lib/format.ts` — EUR/date/percent formatting (`it-IT`
-  locale) and month names; the only place these are formatted.
-- `frontend/src/pages/` — Dashboard, Import, Transactions, Settings, each
+- `frontend/src/lib/format.ts` — locale-aware EUR/date/percent formatting
+  and month names; the only place these are formatted.
+- `frontend/src/lib/i18n/` — UI strings (`en.ts`, `it.ts`), `useT()` /
+  `useI18n()`; missing keys fall back to English.
+- `backend/src/app/i18n.py` — locale resolution (`locale` setting, falling
+  back to English); locale-specific prompts/categories live next to their
+  code as `{"en": ..., "it": ...}` dicts.
+- `backend/src/app/gen_demo_data.py` — builds the synthetic demo dataset in
+  `data-dist/` (`make demo-data`).
+- `frontend/src/pages/` — Dashboard, Import, Transactions, Advice, Settings, each
   with a `dashboard/`, `import/` or `settings/` subfolder for page-local
   components (e.g. `settings/CategoriesTab.tsx`,
   `dashboard/CategoryGrid.tsx`).

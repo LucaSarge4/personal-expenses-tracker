@@ -134,8 +134,8 @@ def seed_all(session: Session) -> None:
 
 if __name__ == "__main__":
     # Run the same Alembic migrations the app uses on startup, rather than a
-    # raw `create_all()`, so a DATA_DIR seeded here (e.g. `make seed-demo`)
-    # has a schema the real app's own migration run recognizes as up to date.
+    # raw `create_all()`, so a DATA_DIR seeded here has a schema the real
+    # app's own migration run recognizes as up to date.
     from app.db import engine
     from app.main import run_migrations
 

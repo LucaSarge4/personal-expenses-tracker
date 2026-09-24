@@ -18,33 +18,62 @@ permanently delete all your data. Both `make dev` and `make start` bind to
 app beyond your own machine, since anyone who can reach it has full access
 and no login is required.
 
-**Locale**: built around my own Italian bank statements (default categories,
-LLM prompts for the Advice feature, and date/currency formatting are all
-Italian/EUR). It should still work for other locales for the core
-import → review → dashboard flow (the LLM does the extraction/classification
-regardless of statement language), but expect to edit categories, rules, and
-some hardcoded Italian strings to fit your own bank and language.
+**Languages**: the UI, the LLM prompts and the default categories are
+available in English and Italian (English is the default and the fallback).
+Switch language from Settings → General, or set `DEFAULT_LOCALE=it` before
+the first run so a fresh database is seeded with Italian categories.
+Statements in other languages usually still work, since the LLM does the
+extraction regardless of the statement language.
 
 ## Prerequisites
 
-- [uv](https://docs.astral.sh/uv/) for the Python backend.
+- [uv](https://docs.astral.sh/uv/) (Python 3.12 backend).
 - Node 22+ (npm) for the frontend.
-- A local OpenAI-compatible LLM server, for example:
-  - [Ollama](https://ollama.com) (recommended): `ollama pull gemma4:26b-a4b-it-qat`,
-    served at `http://localhost:11434/v1`. This is a MoE model (only ~4B
-    active params despite the 26B total), QAT-quantized, and — unlike
-    Qwen3 — it correctly honors Ollama's native "no thinking" mode, which
-    the app uses automatically for a large speedup when talking to Ollama.
-  - Any other OpenAI-compatible local server (LM Studio, llama.cpp, vLLM,
-    MLX) also works, served at its own base URL — configurable in Settings.
-    Thinking-mode suppression is best-effort there since it relies on the
-    model/server honoring a "no_think" instruction in the prompt.
+- A local OpenAI-compatible LLM server (see below).
+
+## Local LLM setup
+
+The app needs a local LLM to extract transactions from statements, classify
+them, and generate advice. Browsing the demo dataset works without one.
+
+**Ollama (recommended)**
+
+1. Install [Ollama](https://ollama.com) and start it (`ollama serve`, or the
+   desktop app).
+2. Pull the default model:
+   ```
+   ollama pull gemma4:26b-a4b-it-qat
+   ```
+   It is a MoE model (~4B active params out of 26B), QAT-quantized, so it is
+   fast for its size, but it still needs roughly 16 GB+ of free RAM/VRAM.
+   On smaller machines pick a smaller instruction-tuned model: extraction
+   quality drops, but it works.
+3. Ollama serves an OpenAI-compatible API at `http://localhost:11434/v1`,
+   which is the app's default, so no configuration is needed.
+
+With Ollama the app automatically disables the model's "thinking" mode
+(native `/api/chat` with `think: false`), which cuts latency a lot. Qwen3
+models ignore this on Ollama, so expect them to be much slower.
+
+**Other servers** (LM Studio, llama.cpp, vLLM, MLX, ...): anything exposing
+an OpenAI-compatible `/v1/chat/completions` endpoint works. Set its base URL
+and model in the app.
+
+**Configuring it in the app**: Settings → LLM lets you pick a preset base
+URL (Ollama / LM Studio) or type your own, choose a model from the server's
+list, set an optional API key, and **Test connection**. A warning is shown if
+the base URL is not `localhost`/`127.0.0.1`, since statements would then
+leave your machine.
 
 ## Setup
 
 ```
 make install
+make demo      # try it with the synthetic demo data, no LLM needed
+make start     # use it for real, with your own data in data/
 ```
+
+Then open http://127.0.0.1:8000.
 
 ## Running
 
@@ -93,6 +122,23 @@ Everything lives under `data/` (gitignored, never committed):
 
 To back up the app, copy the `data/` directory elsewhere.
 
+## Configuration
+
+Environment variables (all optional). The `DEFAULT_*` ones only seed a
+fresh database; after that, everything is edited from the Settings page.
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `DATA_DIR` | `./data` | Where the database, statements and backups live |
+| `DEFAULT_LLM_BASE_URL` | `http://localhost:11434/v1` | Initial LLM server URL |
+| `DEFAULT_LLM_MODEL` | `gemma4:26b-a4b-it-qat` | Initial LLM model |
+| `DEFAULT_LOCALE` | `en` | Initial language (`en` or `it`) and default categories |
+
 ## Development
 
 See [AGENTS.md](./AGENTS.md) for commands, architecture and invariants.
+`make lint` and `make test` run the same checks as CI.
+
+## License
+
+[MIT](./LICENSE)

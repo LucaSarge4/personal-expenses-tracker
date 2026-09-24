@@ -1,4 +1,4 @@
-.PHONY: install dev start lint format test gen-api migrate seed-demo demo-data demo
+.PHONY: install dev start lint format test gen-api migrate demo-data demo
 
 install:
 	cd backend && uv sync
@@ -28,9 +28,6 @@ gen-api:
 
 migrate:
 	cd backend && uv run alembic upgrade head
-
-seed-demo:
-	cd backend && DATA_DIR=../.demo-data uv run python -m app.seed
 
 # Regenerate the committed, fully synthetic demo dataset under data-dist/.
 demo-data:
