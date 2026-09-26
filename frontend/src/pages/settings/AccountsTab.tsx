@@ -18,10 +18,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { useT } from "@/lib/i18n"
+import { useI18n } from "@/lib/i18n"
 
 export function AccountsTab() {
-  const t = useT()
+  const { t, currency } = useI18n()
   const { data: accounts, isLoading } = useAccounts()
   const createAccount = useCreateAccount()
   const updateAccount = useUpdateAccount()
@@ -33,7 +33,7 @@ export function AccountsTab() {
   const handleCreate = () => {
     if (!name.trim()) return
     createAccount.mutate(
-      { name: name.trim(), bank, currency: "EUR", notes: "" },
+      { name: name.trim(), bank, currency, notes: "" },
       {
         onSuccess: () => {
           setName("")

@@ -1,22 +1,28 @@
 import { describe, expect, it } from "vitest"
 
-import { deltaPercent, formatDate, formatEUR, formatPercent, monthName } from "./format"
+import { deltaPercent, formatDate, formatMoney, formatPercent, monthName } from "./format"
 
-describe("formatEUR", () => {
+describe("formatMoney", () => {
   it("formats positive cents in Italian style", () => {
-    expect(formatEUR(2550, "it")).toBe("25,50 €")
+    expect(formatMoney(2550, "it")).toBe("25,50 €")
   })
 
   it("formats negative cents with a minus sign", () => {
-    expect(formatEUR(-2550, "it")).toBe("-25,50 €")
+    expect(formatMoney(-2550, "it")).toBe("-25,50 €")
   })
 
   it("formats zero", () => {
-    expect(formatEUR(0, "it")).toBe("0,00 €")
+    expect(formatMoney(0, "it")).toBe("0,00 €")
   })
 
   it("formats in English style", () => {
-    expect(formatEUR(2550, "en")).toBe("€25.50")
+    expect(formatMoney(2550, "en")).toBe("€25.50")
+  })
+
+  it("formats in the requested currency", () => {
+    expect(formatMoney(2550, "en", "USD")).toBe("$25.50")
+    expect(formatMoney(-2550, "it", "GBP")).toBe("-25,50\u00a0£")
+    expect(formatMoney(2550, "it", "CHF")).toBe("25,50\u00a0CHF")
   })
 })
 

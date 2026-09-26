@@ -30,7 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { formatDate, formatEUR } from "@/lib/format"
+import { formatDate } from "@/lib/format"
 import { useI18n } from "@/lib/i18n"
 import { guessMerchantSnippet } from "@/lib/merchant"
 import { cn } from "@/lib/utils"
@@ -107,7 +107,7 @@ export function ReviewTable({
   importId: number
   categories: CategoryRead[]
 }) {
-  const { t, locale } = useI18n()
+  const { t, locale, formatMoney } = useI18n()
   const { data, isLoading } = useTransactions({ import_id: importId, page_size: 500 })
   const updateTransaction = useUpdateTransaction()
   const deleteTransaction = useDeleteTransaction()
@@ -171,7 +171,7 @@ export function ReviewTable({
                     txn.amount_cents < 0 ? "text-foreground" : "text-emerald-600",
                   )}
                 >
-                  {formatEUR(txn.amount_cents, locale)}
+                  {formatMoney(txn.amount_cents)}
                 </TableCell>
                 <TableCell>
                   <Select
@@ -296,8 +296,8 @@ export function ReviewTable({
           skipPairTarget
             ? t("review.skipPairDescription", {
                 description: skipPairTarget.a.description_raw,
-                amountA: formatEUR(skipPairTarget.a.amount_cents, locale),
-                amountB: formatEUR(skipPairTarget.b.amount_cents, locale),
+                amountA: formatMoney(skipPairTarget.a.amount_cents),
+                amountB: formatMoney(skipPairTarget.b.amount_cents),
               })
             : ""
         }

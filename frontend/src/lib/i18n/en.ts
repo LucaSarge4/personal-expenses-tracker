@@ -154,6 +154,8 @@ export const en: Record<string, string> = {
   "settings.general.title": "General",
   "settings.general.description": "App-wide preferences.",
   "settings.general.language": "Language",
+  "settings.general.currency": "Currency",
+  "settings.general.currencyHint": "Used to display all amounts. Amounts are not converted.",
 
   "settings.llm.title": "Local LLM server",
   "settings.llm.notLocalWarning":

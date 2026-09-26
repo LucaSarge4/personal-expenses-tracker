@@ -1,3 +1,4 @@
+import json
 from datetime import date
 
 from sqlmodel import Session
@@ -76,3 +77,27 @@ def test_advice_month_period_requires_year_and_month(client) -> None:
 def test_advice_no_transactions_in_period_returns_400(client) -> None:
     response = client.post("/api/llm/advice", json={"period": "year", "year": 1999})
     assert response.status_code == 400
+
+
+def test_advice_prompt_uses_configured_currency(client, monkeypatch) -> None:
+    account = client.post("/api/accounts", json={"name": "Advice Currency Account"}).json()
+    category = client.post(
+        "/api/categories",
+        json={"name": "Advice Currency Cat", "kind": "expense", "color": "#321321"},
+    ).json()
+    _seed_transaction(account["id"], category["id"], -5000, date(2026, 1, 5), "advice-txn-currency")
+    client.put("/api/settings", json={"currency": "USD"})
+
+    captured_user: list[str] = []
+
+    def fake_chat_json(system, user, schema):
+        captured_user.append(user)
+        return _FakeAdviceResult()
+
+    monkeypatch.setattr("app.api.llm.chat_json", fake_chat_json)
+
+    response = client.post("/api/llm/advice", json={"period": "all"})
+    assert response.status_code == 200
+    payload = json.loads(captured_user[0])
+    assert payload["currency"] == "USD"
+    assert "expenses" in payload

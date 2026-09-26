@@ -23,7 +23,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { formatEUR } from "@/lib/format"
 import { useI18n } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
 import { ReviewTable } from "@/pages/import/ReviewTable"
@@ -48,7 +47,7 @@ function ImportRow({
   selected: boolean
   onSelect: () => void
 }) {
-  const { t, tn, locale } = useI18n()
+  const { t, tn, formatMoney } = useI18n()
   const deleteImport = useDeleteImport()
   const active = ACTIVE_STATUSES.has(statementImport.status)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
@@ -84,7 +83,7 @@ function ImportRow({
         {!!statementImport.reconcile_diff_cents && (
           <span className="text-destructive">
             {t("import.reconcileDiff", {
-              amount: formatEUR(statementImport.reconcile_diff_cents, locale),
+              amount: formatMoney(statementImport.reconcile_diff_cents),
             })}
           </span>
         )}

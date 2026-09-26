@@ -96,6 +96,7 @@ DEFAULT_SETTINGS = {
     "classify_batch_size": "25",
     "llm_timeout_s": "300",
     "locale": settings.default_locale,
+    "currency": settings.default_currency,
 }
 
 

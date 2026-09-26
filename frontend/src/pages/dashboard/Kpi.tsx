@@ -2,7 +2,8 @@ import { ArrowDown, ArrowUp, PiggyBank, TrendingDown, TrendingUp, Wallet } from 
 import type { LucideIcon } from "lucide-react"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { deltaPercent, formatEUR, formatPercent } from "@/lib/format"
+import { deltaPercent, formatPercent } from "@/lib/format"
+import { useI18n } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
 
 type Accent = "green" | "orange" | "blue" | "purple"
@@ -48,6 +49,7 @@ export function Kpi({
   isPercent?: boolean
   accent?: Accent
 }) {
+  const { formatMoney } = useI18n()
   const delta = isPercent ? cents - prevCents : deltaPercent(cents, prevCents)
   const positive = delta !== null && delta > 0
   const negative = delta !== null && delta < 0
@@ -65,7 +67,7 @@ export function Kpi({
       </CardHeader>
       <CardContent className="flex items-end justify-between">
         <span className="text-3xl font-semibold tracking-tight tabular-nums">
-          {isPercent ? formatPercent(cents) : formatEUR(cents)}
+          {isPercent ? formatPercent(cents) : formatMoney(cents)}
         </span>
         {delta !== null && (
           <span

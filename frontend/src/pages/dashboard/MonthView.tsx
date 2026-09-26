@@ -14,7 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { ExpandableText } from "@/components/expandable-text"
-import { formatDate, formatEUR, monthName } from "@/lib/format"
+import { formatDate, monthName } from "@/lib/format"
 import { useI18n } from "@/lib/i18n"
 import { guessMerchantSnippet } from "@/lib/merchant"
 import { cn } from "@/lib/utils"
@@ -37,7 +37,7 @@ export function MonthView({
   month: number
   accountId?: number
 }) {
-  const { t, locale } = useI18n()
+  const { t, locale, formatMoney } = useI18n()
   const { data: byCategory, isLoading: byCategoryLoading } = useStatsByCategory({
     year,
     month,
@@ -112,7 +112,7 @@ export function MonthView({
                       ))}
                     </Pie>
                     <Tooltip
-                      formatter={(value) => formatEUR(Number(value), locale)}
+                      formatter={(value) => formatMoney(Number(value))}
                       contentStyle={CHART_TOOLTIP_STYLE}
                     />
                   </PieChart>
@@ -132,7 +132,7 @@ export function MonthView({
                           <span className="min-w-0 truncate font-medium">{s.name}</span>
                         </span>
                         <span className="shrink-0 whitespace-nowrap tabular-nums text-muted-foreground">
-                          {formatEUR(s.value, locale)} ·{" "}
+                          {formatMoney(s.value)} ·{" "}
                           {totalExpenses ? Math.round((s.value / totalExpenses) * 100) : 0}%
                         </span>
                       </Link>
@@ -163,7 +163,7 @@ export function MonthView({
                     >
                       <span className="min-w-0 flex-1 truncate font-medium">{m.label || "—"}</span>
                       <span className="shrink-0 whitespace-nowrap tabular-nums text-muted-foreground">
-                        {formatEUR(m.cents, locale)}
+                        {formatMoney(m.cents)}
                       </span>
                     </Link>
                   </li>
@@ -217,7 +217,7 @@ export function MonthView({
                           : "text-emerald-600 dark:text-emerald-400",
                       )}
                     >
-                      {formatEUR(t.amount_cents, locale)}
+                      {formatMoney(t.amount_cents)}
                     </TableCell>
                   </TableRow>
                 ))}

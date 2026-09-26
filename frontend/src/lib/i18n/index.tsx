@@ -2,6 +2,8 @@ import { createContext, useContext, useMemo } from "react"
 import type { ReactNode } from "react"
 
 import { useSettings } from "@/api/hooks"
+import { formatMoney as formatMoneyIn, resolveCurrency } from "@/lib/format"
+import type { Currency } from "@/lib/format"
 import { en } from "@/lib/i18n/en"
 import { it } from "@/lib/i18n/it"
 
@@ -40,8 +42,11 @@ function translateCount(locale: Locale, key: string, count: number, vars?: Vars)
 
 interface I18nContextValue {
   locale: Locale
+  currency: Currency
   t: (key: string, vars?: Vars) => string
   tn: (key: string, count: number, vars?: Vars) => string
+  /** Formats signed cents in the configured locale and display currency. */
+  formatMoney: (cents: number) => string
 }
 
 const I18nContext = createContext<I18nContextValue | null>(null)
@@ -49,14 +54,17 @@ const I18nContext = createContext<I18nContextValue | null>(null)
 export function I18nProvider({ children }: { children: ReactNode }) {
   const { data: settings } = useSettings()
   const locale = resolveLocale(settings?.locale)
+  const currency = resolveCurrency(settings?.currency)
 
   const value = useMemo<I18nContextValue>(
     () => ({
       locale,
+      currency,
       t: (key, vars) => translate(locale, key, vars),
       tn: (key, count, vars) => translateCount(locale, key, count, vars),
+      formatMoney: (cents) => formatMoneyIn(cents, locale, currency),
     }),
-    [locale],
+    [locale, currency],
   )
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>

@@ -1,8 +1,7 @@
 import { Link } from "react-router-dom"
 
 import type { GridResponse, GridRow, GroupSubtotal } from "@/api/types"
-import { formatEUR, MONTH_NAMES_SHORT } from "@/lib/format"
-import type { FormatLocale } from "@/lib/format"
+import { MONTH_NAMES_SHORT } from "@/lib/format"
 import { useI18n } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
 
@@ -24,19 +23,12 @@ function withSubtotals(rows: GridRow[], subtotals: GroupSubtotal[]): LineItem[] 
   return items
 }
 
-function Cell({
-  value,
-  locale,
-  href,
-}: {
-  value: number
-  locale: FormatLocale
-  href?: string
-}) {
+function Cell({ value, href }: { value: number; href?: string }) {
+  const { formatMoney } = useI18n()
   if (value === 0) {
     return <td className="px-2 py-1 text-right text-sm text-muted-foreground/60">–</td>
   }
-  const content = formatEUR(value, locale)
+  const content = formatMoney(value)
   return (
     <td className="px-2 py-1 text-right text-sm tabular-nums">
       {href ? (
@@ -53,12 +45,10 @@ function Cell({
 function SectionRows({
   items,
   year,
-  locale,
   totalLabel,
 }: {
   items: LineItem[]
   year: number
-  locale: FormatLocale
   totalLabel: string
 }) {
   return (
@@ -77,7 +67,6 @@ function SectionRows({
               <Cell
                 key={m}
                 value={value}
-                locale={locale}
                 href={
                   value !== 0
                     ? `/transactions?year=${year}&month=${m + 1}&category_id=${item.row.category_id}`
@@ -85,7 +74,7 @@ function SectionRows({
                 }
               />
             ))}
-            <Cell value={item.row.total} locale={locale} />
+            <Cell value={item.row.total} />
           </tr>
         ) : (
           <tr key={`subtotal-${item.subtotal.group}-${idx}`} className="border-b bg-muted/50 font-medium">
@@ -93,9 +82,9 @@ function SectionRows({
               {totalLabel} {item.subtotal.group}
             </td>
             {item.subtotal.months.map((value, m) => (
-              <Cell key={m} value={value} locale={locale} />
+              <Cell key={m} value={value} />
             ))}
-            <Cell value={item.subtotal.total} locale={locale} />
+            <Cell value={item.subtotal.total} />
           </tr>
         ),
       )}
@@ -144,7 +133,7 @@ export function CategoryGrid({ grid, year }: { grid: GridResponse; year: number 
               </td>
             </tr>
           )}
-          <SectionRows items={incomeItems} year={year} locale={locale} totalLabel={totalLabel} />
+          <SectionRows items={incomeItems} year={year} totalLabel={totalLabel} />
           {expenseItems.length > 0 && (
             <tr>
               <td
@@ -155,15 +144,15 @@ export function CategoryGrid({ grid, year }: { grid: GridResponse; year: number 
               </td>
             </tr>
           )}
-          <SectionRows items={expenseItems} year={year} locale={locale} totalLabel={totalLabel} />
+          <SectionRows items={expenseItems} year={year} totalLabel={totalLabel} />
           <tr className={cn("border-t-2 font-semibold")}>
             <td className="sticky left-0 z-10 bg-background px-2 py-1.5 text-sm">
               {t("common.total")}
             </td>
             {grid.month_totals.map((value, m) => (
-              <Cell key={m} value={value} locale={locale} />
+              <Cell key={m} value={value} />
             ))}
-            <Cell value={grid.year_total} locale={locale} />
+            <Cell value={grid.year_total} />
           </tr>
         </tbody>
       </table>

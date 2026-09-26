@@ -10,6 +10,7 @@ export interface AppSettings {
   classify_batch_size: string
   llm_timeout_s: string
   locale: string
+  currency: string
   [key: string]: string
 }
 

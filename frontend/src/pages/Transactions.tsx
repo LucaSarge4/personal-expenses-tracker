@@ -35,7 +35,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Textarea } from "@/components/ui/textarea"
-import { formatDate, formatEUR, monthName } from "@/lib/format"
+import { formatDate, monthName } from "@/lib/format"
 import { useI18n } from "@/lib/i18n"
 import { guessMerchantSnippet } from "@/lib/merchant"
 import { cn } from "@/lib/utils"
@@ -94,7 +94,7 @@ function NotesPopover({ id, notes }: { id: number; notes: string }) {
 }
 
 export function Transactions() {
-  const { t, tn, locale } = useI18n()
+  const { t, tn, locale, formatMoney } = useI18n()
   const [searchParams, setSearchParams] = useSearchParams()
   const { data: accounts } = useAccounts()
   const { data: categories } = useCategories()
@@ -352,7 +352,7 @@ export function Transactions() {
                       txn.amount_cents < 0 ? "text-foreground" : "text-emerald-600",
                     )}
                   >
-                    {formatEUR(txn.amount_cents, locale)}
+                    {formatMoney(txn.amount_cents)}
                   </TableCell>
                   <TableCell>
                     <Select

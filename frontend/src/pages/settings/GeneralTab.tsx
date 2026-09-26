@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { resolveCurrency, SUPPORTED_CURRENCIES } from "@/lib/format"
 import { SUPPORTED_LOCALES, useT } from "@/lib/i18n"
 
 const LOCALE_LABELS: Record<string, string> = {
@@ -29,6 +30,13 @@ export function GeneralTab() {
   const locale = SUPPORTED_LOCALES.includes(settings.locale as (typeof SUPPORTED_LOCALES)[number])
     ? settings.locale
     : "en"
+  const currency = resolveCurrency(settings.currency)
+
+  const save = (payload: Record<string, string>) =>
+    updateSettings.mutate(payload, {
+      onSuccess: () => toast.success(t("settings.toastSaved")),
+      onError: (err) => toast.error(err.message),
+    })
 
   return (
     <Card>
@@ -36,31 +44,38 @@ export function GeneralTab() {
         <CardTitle>{t("settings.general.title")}</CardTitle>
         <CardDescription>{t("settings.general.description")}</CardDescription>
       </CardHeader>
-      <CardContent className="flex max-w-xl flex-col gap-1.5">
-        <Label htmlFor="locale">{t("settings.general.language")}</Label>
-        <Select
-          value={locale}
-          onValueChange={(value) =>
-            updateSettings.mutate(
-              { locale: value },
-              {
-                onSuccess: () => toast.success(t("settings.toastSaved")),
-                onError: (err) => toast.error(err.message),
-              },
-            )
-          }
-        >
-          <SelectTrigger id="locale" className="w-56">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {SUPPORTED_LOCALES.map((l) => (
-              <SelectItem key={l} value={l}>
-                {LOCALE_LABELS[l] ?? l}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <CardContent className="flex max-w-xl flex-col gap-4">
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="locale">{t("settings.general.language")}</Label>
+          <Select value={locale} onValueChange={(value) => save({ locale: value })}>
+            <SelectTrigger id="locale" className="w-56">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {SUPPORTED_LOCALES.map((l) => (
+                <SelectItem key={l} value={l}>
+                  {LOCALE_LABELS[l] ?? l}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="currency">{t("settings.general.currency")}</Label>
+          <Select value={currency} onValueChange={(value) => save({ currency: value })}>
+            <SelectTrigger id="currency" className="w-56">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {SUPPORTED_CURRENCIES.map((c) => (
+                <SelectItem key={c} value={c}>
+                  {c}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">{t("settings.general.currencyHint")}</p>
+        </div>
       </CardContent>
     </Card>
   )

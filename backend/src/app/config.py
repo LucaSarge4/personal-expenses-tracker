@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     default_llm_base_url: str = "http://localhost:11434/v1"
     default_llm_model: str = "gemma4:26b-a4b-it-qat"
     default_locale: str = "en"
+    default_currency: str = "EUR"
 
     @property
     def db_path(self) -> Path:

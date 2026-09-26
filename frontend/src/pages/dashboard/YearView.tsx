@@ -16,7 +16,7 @@ import { Link } from "react-router-dom"
 
 import { useStatsByCategory, useStatsGrid, useStatsMonthly } from "@/api/hooks"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { formatEUR, MONTH_NAMES_SHORT } from "@/lib/format"
+import { MONTH_NAMES_SHORT } from "@/lib/format"
 import { useI18n } from "@/lib/i18n"
 import { CategoryGrid } from "@/pages/dashboard/CategoryGrid"
 
@@ -36,7 +36,7 @@ const CHART_TOOLTIP_STYLE = {
 }
 
 export function YearView({ year, accountId }: { year: number; accountId?: number }) {
-  const { t, locale } = useI18n()
+  const { t, locale, formatMoney } = useI18n()
   const { data: monthly, isLoading: monthlyLoading } = useStatsMonthly({
     year,
     account_id: accountId,
@@ -87,14 +87,14 @@ export function YearView({ year, accountId }: { year: number; accountId?: number
                 />
                 <YAxis
                   fontSize={12}
-                  tickFormatter={(v) => formatEUR(v * 100, locale)}
+                  tickFormatter={(v) => formatMoney(v * 100)}
                   width={80}
                   tickLine={false}
                   axisLine={false}
                   className="fill-muted-foreground"
                 />
                 <Tooltip
-                  formatter={(value) => formatEUR(Number(value) * 100, locale)}
+                  formatter={(value) => formatMoney(Number(value) * 100)}
                   contentStyle={CHART_TOOLTIP_STYLE}
                   cursor={{ fill: "var(--muted)", opacity: 0.4 }}
                 />
@@ -140,7 +140,7 @@ export function YearView({ year, accountId }: { year: number; accountId?: number
                     ))}
                   </Pie>
                   <Tooltip
-                    formatter={(value) => formatEUR(Number(value), locale)}
+                    formatter={(value) => formatMoney(Number(value))}
                     contentStyle={CHART_TOOLTIP_STYLE}
                   />
                 </PieChart>
@@ -160,7 +160,7 @@ export function YearView({ year, accountId }: { year: number; accountId?: number
                         <span className="min-w-0 truncate font-medium">{s.name}</span>
                       </span>
                       <span className="shrink-0 whitespace-nowrap tabular-nums text-muted-foreground">
-                        {formatEUR(s.value, locale)} ·{" "}
+                        {formatMoney(s.value)} ·{" "}
                         {totalExpenses ? Math.round((s.value / totalExpenses) * 100) : 0}%
                       </span>
                     </Link>

@@ -13,7 +13,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { formatEUR } from "@/lib/format"
 import { useI18n } from "@/lib/i18n"
 
 export function BulkApplyDialog({
@@ -29,7 +28,7 @@ export function BulkApplyDialog({
   siblings: TransactionRead[]
   onDone: () => void
 }) {
-  const { t, tn, locale } = useI18n()
+  const { t, tn, formatMoney } = useI18n()
   const [titleBefore, titleAfter] = t("bulkApply.title").split("{{category}}")
   const [snippet, setSnippet] = useState(initialSnippet)
   const [alsoCreateRule, setAlsoCreateRule] = useState(true)
@@ -89,7 +88,7 @@ export function BulkApplyDialog({
                       {t.description_raw}
                     </span>
                     <span className="shrink-0 whitespace-nowrap font-mono text-xs text-muted-foreground">
-                      {formatEUR(t.amount_cents, locale)}
+                      {formatMoney(t.amount_cents)}
                     </span>
                   </li>
                 ))}

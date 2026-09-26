@@ -7,7 +7,7 @@ from sqlalchemy import Integer, and_, case, func
 from sqlmodel import Session, select
 
 from app.db import get_session
-from app.i18n import get_locale, resolve_locale
+from app.i18n import get_currency, get_locale, resolve_locale
 from app.llm.client import LLMError, chat_json, list_models, timed_test_call
 from app.models import Category, CategoryKind, Transaction
 from app.schemas import AdviceItem, AdviceRequest, AdviceResponse
@@ -142,7 +142,7 @@ def _period_label(period: str, year: int | None, month: int | None, locale: str)
     return ALL_TIME_LABEL[locale]
 
 
-def _to_euro(cents: int) -> float:
+def _to_units(cents: int) -> float:
     return round(cents / 100, 2)
 
 
@@ -172,20 +172,20 @@ def _category_breakdown(
 
     expense_categories = sorted(
         (
-            {"name": n, "total_eur": _to_euro(abs(int(t)))}
+            {"name": n, "total": _to_units(abs(int(t)))}
             for n, k, t in rows
             if k == CategoryKind.expense and t != 0
         ),
-        key=lambda r: r["total_eur"],
+        key=lambda r: r["total"],
         reverse=True,
     )
     income_categories = sorted(
         (
-            {"name": n, "total_eur": _to_euro(int(t))}
+            {"name": n, "total": _to_units(int(t))}
             for n, k, t in rows
             if k == CategoryKind.income and t > 0
         ),
-        key=lambda r: r["total_eur"],
+        key=lambda r: r["total"],
         reverse=True,
     )
     return int(income), int(expenses), expense_categories, income_categories
@@ -254,8 +254,8 @@ def _trend(
         return [
             {
                 "label": MONTH_NAMES[locale][int(bucket) - 1],
-                "income_eur": _to_euro(int(inc)),
-                "expenses_eur": _to_euro(abs(int(exp))),
+                "income": _to_units(int(inc)),
+                "expenses": _to_units(abs(int(exp))),
             }
             for bucket, inc, exp in sorted(rows, key=lambda r: r[0])
         ]
@@ -278,7 +278,7 @@ def _trend(
     if len(rows) < 2:
         return None
     return [
-        {"label": bucket, "income_eur": _to_euro(int(inc)), "expenses_eur": _to_euro(abs(int(exp)))}
+        {"label": bucket, "income": _to_units(int(inc)), "expenses": _to_units(abs(int(exp)))}
         for bucket, inc, exp in sorted(rows, key=lambda r: r[0])
     ]
 
@@ -302,9 +302,10 @@ def get_advice(payload: AdviceRequest, session: Session = Depends(get_session)) 
     net = income - expenses
     prompt_payload: dict[str, object] = {
         "period": period_label,
-        "income_eur": _to_euro(income),
-        "expenses_eur": _to_euro(expenses),
-        "net_eur": _to_euro(net),
+        "currency": get_currency(session),
+        "income": _to_units(income),
+        "expenses": _to_units(expenses),
+        "net": _to_units(net),
         "savings_rate": round(net / income, 3) if income else None,
         "expense_categories": expense_categories,
         "income_categories": income_categories,

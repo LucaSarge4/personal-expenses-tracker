@@ -2,9 +2,27 @@ export type FormatLocale = "en" | "it"
 
 const INTL_LOCALE: Record<FormatLocale, string> = { en: "en-US", it: "it-IT" }
 
-const EUR_FORMATTERS: Record<FormatLocale, Intl.NumberFormat> = {
-  en: new Intl.NumberFormat(INTL_LOCALE.en, { style: "currency", currency: "EUR" }),
-  it: new Intl.NumberFormat(INTL_LOCALE.it, { style: "currency", currency: "EUR" }),
+/** Display currencies offered in Settings. All use 2 minor-unit digits, so
+ * `amount_cents / 100` is always the right major-unit value. */
+export const SUPPORTED_CURRENCIES = [
+  "EUR", "USD", "GBP", "CHF", "CAD", "AUD", "SEK", "NOK", "DKK", "PLN",
+] as const
+export type Currency = (typeof SUPPORTED_CURRENCIES)[number]
+
+export function resolveCurrency(value: string | undefined | null): Currency {
+  return SUPPORTED_CURRENCIES.includes(value as Currency) ? (value as Currency) : "EUR"
+}
+
+const MONEY_FORMATTERS = new Map<string, Intl.NumberFormat>()
+
+function moneyFormatter(locale: FormatLocale, currency: Currency): Intl.NumberFormat {
+  const key = `${locale}:${currency}`
+  let formatter = MONEY_FORMATTERS.get(key)
+  if (!formatter) {
+    formatter = new Intl.NumberFormat(INTL_LOCALE[locale], { style: "currency", currency })
+    MONEY_FORMATTERS.set(key, formatter)
+  }
+  return formatter
 }
 
 const DATE_FORMATTERS: Record<FormatLocale, Intl.DateTimeFormat> = {
@@ -12,8 +30,12 @@ const DATE_FORMATTERS: Record<FormatLocale, Intl.DateTimeFormat> = {
   it: new Intl.DateTimeFormat(INTL_LOCALE.it, { day: "2-digit", month: "2-digit", year: "numeric" }),
 }
 
-export function formatEUR(cents: number, locale: FormatLocale = "en"): string {
-  return EUR_FORMATTERS[locale].format(cents / 100)
+export function formatMoney(
+  cents: number,
+  locale: FormatLocale = "en",
+  currency: Currency = "EUR",
+): string {
+  return moneyFormatter(locale, currency).format(cents / 100)
 }
 
 export function formatDate(isoDate: string, locale: FormatLocale = "en"): string {

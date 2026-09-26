@@ -23,6 +23,7 @@ def test_seed_is_idempotent() -> None:
             "classify_batch_size",
             "llm_timeout_s",
             "locale",
+            "currency",
         }
 
 

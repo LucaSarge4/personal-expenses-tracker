@@ -153,6 +153,8 @@ export const it: Record<string, string> = {
   "settings.general.title": "Generale",
   "settings.general.description": "Preferenze generali dell'app.",
   "settings.general.language": "Lingua",
+  "settings.general.currency": "Valuta",
+  "settings.general.currencyHint": "Usata per mostrare tutti gli importi. Gli importi non vengono convertiti.",
 
   "settings.llm.title": "Server LLM locale",
   "settings.llm.notLocalWarning":
