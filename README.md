@@ -1,5 +1,17 @@
 # Personal Expenses Tracker
 
+[![CI](https://github.com/LucaSarge4/personal-expenses-tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/LucaSarge4/personal-expenses-tracker/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+![Python 3.12](https://img.shields.io/badge/python-3.12-3776AB?logo=python&logoColor=white)
+![Node 22+](https://img.shields.io/badge/node-22%2B-339933?logo=node.js&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
+![Local LLM: Ollama](https://img.shields.io/badge/LLM-Ollama%20%28local%29-000000?logo=ollama&logoColor=white)
+
+[![Watch the 20-second demo](./expenses-promo-poster.jpg)](./expenses-promo.mp4)
+
+▶ [Watch the 20-second demo](./expenses-promo.mp4) (synthetic demo data)
+
 A local-only expenses tracker. Drop in bank statements (PDF, CSV, XLSX) from
 several banks, and a local LLM extracts and classifies the transactions into
 your own categories. A dashboard shows the result, filterable by year or
