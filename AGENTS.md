@@ -60,6 +60,26 @@ source of truth; `CLAUDE.md` just points here.
   components (e.g. `settings/CategoriesTab.tsx`,
   `dashboard/CategoryGrid.tsx`).
 
+## Testing
+
+- Backend tests share one throwaway SQLite DB for the whole session
+  (`tests/conftest.py`). Give each test its own uniquely named account /
+  category (e.g. with a `uuid` suffix) and filter by it, so tests don't see
+  each other's data.
+- Frontend component tests render real pages against an in-memory fake
+  backend instead of mocking hooks:
+  - `src/test/fake-api.ts` — `mockApi({"GET /api/accounts": [...]})` to set
+    responses (path params as `{id}`; a function receives the call; return
+    `new FakeResponse(status, body)` for errors), `callsTo("POST /api/imports")`
+    to assert what the UI sent. Every list endpoint has an empty default.
+  - `src/test/render.tsx` — `renderWithProviders(<Page />, { route })` wraps
+    the same providers as `main.tsx`; the current URL is exposed as
+    `data-testid="location"`.
+  - `src/test/factories.ts` — `makeAccount()`, `makeImport()`, ... for valid
+    API objects.
+- Stats endpoints report `expenses` as a positive magnitude; transaction and
+  grid amounts are signed cents. Tests should mirror the real API shapes.
+
 ## Invariants
 
 - Money is always a **signed integer number of cents** (negative = outflow).
