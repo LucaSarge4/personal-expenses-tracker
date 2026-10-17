@@ -8,9 +8,9 @@
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
 ![Local LLM: Ollama](https://img.shields.io/badge/LLM-Ollama%20%28local%29-000000?logo=ollama&logoColor=white)
 
-![20-second demo of importing a statement and exploring the dashboard](./expenses-promo.gif)
+![24-second demo: importing a statement, adding transactions by hand, the dashboard and accent colors](./expenses-demo.gif)
 
-Demo recorded on the synthetic demo dataset. [Download the full-quality video with sound](./expenses-promo.mp4) (MP4, 7.5 MB).
+Demo recorded on the synthetic demo dataset. [Download the full-quality video with sound](./expenses-promo.mp4) (MP4, 11 MB).
 
 A local-only expenses tracker. Drop in bank statements (PDF, CSV, XLSX) from
 several banks, and a local LLM extracts and classifies the transactions into
