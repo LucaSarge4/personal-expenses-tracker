@@ -311,7 +311,25 @@ export interface paths {
         /** List Transactions */
         get: operations["list_transactions_api_transactions_get"];
         put?: never;
-        post?: never;
+        /** Create Transaction */
+        post: operations["create_transaction_api_transactions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/transactions/batch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Transactions */
+        post: operations["create_transactions_api_transactions_batch_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -738,6 +756,11 @@ export interface components {
             /** Created From Txn Id */
             created_from_txn_id: number | null;
         };
+        /** TransactionBatchCreate */
+        TransactionBatchCreate: {
+            /** Items */
+            items: components["schemas"]["TransactionCreate"][];
+        };
         /** TransactionBulkUpdate */
         TransactionBulkUpdate: {
             /** Ids */
@@ -746,6 +769,27 @@ export interface components {
             category_id?: number | null;
             /** Reviewed */
             reviewed?: boolean | null;
+        };
+        /** TransactionCreate */
+        TransactionCreate: {
+            /** Account Id */
+            account_id: number;
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /** Description Raw */
+            description_raw: string;
+            /** Amount Cents */
+            amount_cents: number;
+            /** Category Id */
+            category_id?: number | null;
+            /**
+             * Notes
+             * @default
+             */
+            notes: string;
         };
         /** TransactionRead */
         TransactionRead: {
@@ -789,6 +833,14 @@ export interface components {
             notes?: string | null;
             /** Reviewed */
             reviewed?: boolean | null;
+            /** Date */
+            date?: string | null;
+            /** Description Raw */
+            description_raw?: string | null;
+            /** Amount Cents */
+            amount_cents?: number | null;
+            /** Account Id */
+            account_id?: number | null;
         };
         /** ValidationError */
         ValidationError: {
@@ -1577,6 +1629,13 @@ export interface operations {
                 import_id?: number | null;
                 needs_review?: boolean | null;
                 q?: string | null;
+                date_from?: string | null;
+                date_to?: string | null;
+                amount_min?: number | null;
+                amount_max?: number | null;
+                type?: ("income" | "expense") | null;
+                uncategorized?: boolean | null;
+                source?: ("manual" | "imported") | null;
                 page?: number;
                 page_size?: number;
             };
@@ -1595,6 +1654,72 @@ export interface operations {
                     "application/json": {
                         [key: string]: unknown;
                     };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_transaction_api_transactions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TransactionCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TransactionRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_transactions_api_transactions_batch_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TransactionBatchCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TransactionRead"][];
                 };
             };
             /** @description Validation Error */

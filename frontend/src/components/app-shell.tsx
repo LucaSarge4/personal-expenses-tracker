@@ -21,7 +21,7 @@ export function AppShell() {
     <div className="ambient-field flex h-svh flex-col overflow-hidden md:flex-row">
       <aside className="m-2 mr-0 hidden w-56 shrink-0 flex-col overflow-hidden rounded-2xl bg-card shadow-surface md:flex backdrop-blur-2xl backdrop-saturate-150">
         <div className="flex items-center gap-2.5 px-4 pt-5 pb-4">
-          <span className="flex size-8 items-center justify-center rounded-[9px] bg-gradient-to-br from-[#7d7aff] to-[#5856d6] text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.25)]">
+          <span className="flex size-8 items-center justify-center rounded-[9px] bg-gradient-to-br from-accent-light to-primary text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.25)]">
             <WalletCards className="size-[18px]" />
           </span>
           <span className="text-[15px] font-semibold tracking-[-0.01em]">{t("app.title")}</span>
@@ -57,7 +57,7 @@ export function AppShell() {
       {/* Phones: slim top bar + bottom tab bar instead of the sidebar. */}
       <header className="flex shrink-0 items-center justify-between border-b border-hairline bg-card px-4 py-2 backdrop-blur-2xl md:hidden">
         <span className="flex items-center gap-2 text-[15px] font-semibold">
-          <span className="flex size-7 items-center justify-center rounded-[8px] bg-gradient-to-br from-[#7d7aff] to-[#5856d6] text-white">
+          <span className="flex size-7 items-center justify-center rounded-[8px] bg-gradient-to-br from-accent-light to-primary text-white">
             <WalletCards className="size-4" />
           </span>
           {t("app.title")}

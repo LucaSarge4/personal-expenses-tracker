@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest"
 
-import { deltaPercent, formatAmount, formatDate, formatMoney, formatPercent, monthName } from "./format"
+import {
+  deltaPercent,
+  formatAmount,
+  formatDate,
+  formatMoney,
+  formatPercent,
+  monthName,
+  parseAmount,
+} from "./format"
 
 describe("formatMoney", () => {
   it("formats positive cents in Italian style", () => {
@@ -76,5 +84,28 @@ describe("formatAmount", () => {
     expect(formatAmount(306677, "en")).toBe("3,067")
     expect(formatAmount(-95000, "it")).toBe("-950")
     expect(formatAmount(1234567, "it")).toBe("12.346")
+  })
+})
+
+describe("parseAmount", () => {
+  it.each([
+    ["12", 1200],
+    ["12.5", 1250],
+    ["12,50", 1250],
+    ["0,99", 99],
+    ["1.234", 123400],
+    ["1,234", 123400],
+    ["1.234,56", 123456],
+    ["1,234.56", 123456],
+    ["1.234.567", 123456700],
+    ["€ 12", 1200],
+    ["-3,50", 350],
+    [" 7 ", 700],
+  ])("parses %j as %i cents", (input, cents) => {
+    expect(parseAmount(input)).toBe(cents)
+  })
+
+  it.each(["", "abc", "12.", "1.2.3", "12,345,6"])("rejects %j", (input) => {
+    expect(parseAmount(input)).toBeNull()
   })
 })

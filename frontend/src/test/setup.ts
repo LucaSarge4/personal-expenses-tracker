@@ -51,4 +51,5 @@ afterEach(() => {
   cleanup()
   localStorage.clear()
   document.documentElement.className = ""
+  delete document.documentElement.dataset.accent
 })

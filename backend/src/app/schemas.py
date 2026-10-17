@@ -1,7 +1,8 @@
+import datetime as dt
 from datetime import date, datetime
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 
 from app.models import CategoryKind, ImportStatus
 
@@ -112,10 +113,54 @@ class TransactionRead(BaseModel):
     notes: str
 
 
+def _require_description(value: str) -> str:
+    value = value.strip()
+    if not value:
+        raise ValueError("description must not be empty")
+    return value
+
+
+def _require_nonzero(value: int) -> int:
+    if value == 0:
+        raise ValueError("amount must not be zero")
+    return value
+
+
+class TransactionCreate(BaseModel):
+    account_id: int
+    date: date
+    description_raw: str
+    amount_cents: int
+    category_id: int | None = None
+    notes: str = ""
+
+    _description = field_validator("description_raw")(_require_description)
+    _amount = field_validator("amount_cents")(_require_nonzero)
+
+
+class TransactionBatchCreate(BaseModel):
+    items: list[TransactionCreate] = Field(min_length=1, max_length=500)
+
+
 class TransactionUpdate(BaseModel):
     category_id: int | None = None
     notes: str | None = None
     reviewed: bool | None = None
+    # `dt.date`: the field name shadows `date` inside the class body.
+    date: dt.date | None = None
+    description_raw: str | None = None
+    amount_cents: int | None = None
+    account_id: int | None = None
+
+    @field_validator("description_raw")
+    @classmethod
+    def _description(cls, value: str | None) -> str | None:
+        return None if value is None else _require_description(value)
+
+    @field_validator("amount_cents")
+    @classmethod
+    def _amount(cls, value: int | None) -> int | None:
+        return None if value is None else _require_nonzero(value)
 
 
 class TransactionBulkUpdate(BaseModel):

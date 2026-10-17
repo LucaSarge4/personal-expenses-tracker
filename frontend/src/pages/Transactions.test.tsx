@@ -51,6 +51,92 @@ describe("Transactions page", () => {
     )
   })
 
+  it("sends a custom date range instead of year and month", async () => {
+    renderWithProviders(<Transactions />, {
+      route: "/transactions?period=custom&from=2026-01-15&to=2026-03-31&year=2025",
+    })
+    await waitFor(() =>
+      expect(lastListQuery()).toEqual({ date_from: "2026-01-15", date_to: "2026-03-31", page: "1", page_size: "50" }),
+    )
+    expect(screen.getByLabelText("From")).toHaveValue("2026-01-15")
+    expect(screen.getByRole("combobox", { name: "Period" })).toHaveTextContent("Custom range…")
+  })
+
+  it("switches between a month and a custom range", async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<Transactions />, { route: "/transactions?month=4" })
+    await user.click(screen.getByRole("combobox", { name: "Period" }))
+    await user.click(await screen.findByRole("option", { name: "Custom range…" }))
+    expect(location()).toBe("/transactions?period=custom")
+
+    await user.type(screen.getByLabelText("From"), "2026-05-01")
+    await waitFor(() => expect(lastListQuery()).toMatchObject({ date_from: "2026-05-01" }))
+
+    await user.click(screen.getByRole("combobox", { name: "Period" }))
+    await user.click(await screen.findByRole("option", { name: "June" }))
+    expect(location()).toBe("/transactions?month=6")
+  })
+
+  it("filters uncategorized transactions from the category menu", async () => {
+    const user = userEvent.setup()
+    mockApi({ "GET /api/categories": CATEGORIES })
+    renderWithProviders(<Transactions />, { route: "/transactions" })
+    await user.click(screen.getByRole("combobox", { name: "Category" }))
+    await user.click(await screen.findByRole("option", { name: "Uncategorized" }))
+    expect(location()).toBe("/transactions?category_id=none")
+    await waitFor(() => expect(lastListQuery()).toMatchObject({ uncategorized: "true" }))
+    expect(lastListQuery()).not.toHaveProperty("category_id")
+  })
+
+  it("turns the extra filters into the API query and shows them as chips", async () => {
+    renderWithProviders(<Transactions />, {
+      route: "/transactions?type=expense&min=1000&max=5000&source=manual&needs_review=true",
+    })
+    await waitFor(() =>
+      expect(lastListQuery()).toMatchObject({
+        type: "expense",
+        amount_min: "1000",
+        amount_max: "5000",
+        source: "manual",
+        needs_review: "true",
+      }),
+    )
+    expect(screen.getByRole("button", { name: /Filters\s*4/ })).toBeInTheDocument()
+    for (const chip of ["Expense", "€10.00 – €50.00", "Added by hand", "Needs review"]) {
+      expect(screen.getByRole("button", { name: `Remove filter: ${chip}` })).toBeInTheDocument()
+    }
+  })
+
+  it("removes one chip, or all of them", async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<Transactions />, { route: "/transactions?type=income&min=1000&q=bar" })
+    await user.click(screen.getByRole("button", { name: "Remove filter: Income" }))
+    expect(location()).toBe("/transactions?min=1000&q=bar")
+    expect(screen.getByRole("button", { name: "Remove filter: From €10.00" })).toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: "Remove filter: From €10.00" }))
+    expect(location()).toBe("/transactions?q=bar")
+  })
+
+  it("sets type, amount and source from the filters popover", async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<Transactions />, { route: "/transactions" })
+    await user.click(screen.getByRole("button", { name: "Filters" }))
+    const popover = await screen.findByRole("dialog")
+
+    await user.click(within(popover).getByRole("radio", { name: "Income" }))
+    expect(location()).toBe("/transactions?type=income")
+
+    await user.type(within(popover).getByLabelText("Min amount"), "12,5{Enter}")
+    expect(location()).toBe("/transactions?type=income&min=1250")
+
+    await user.click(within(popover).getByRole("radio", { name: "Imported" }))
+    await user.click(within(popover).getByRole("checkbox", { name: "Needs review" }))
+    await waitFor(() =>
+      expect(lastListQuery()).toMatchObject({ type: "income", amount_min: "1250", source: "imported", needs_review: "true" }),
+    )
+  })
+
   it("debounces search into the URL and resets to the first page", async () => {
     const user = userEvent.setup()
     renderWithProviders(<Transactions />, { route: "/transactions?page=3" })

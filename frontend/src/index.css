@@ -26,7 +26,7 @@
   --destructive: #ff3b30;
   --border: rgb(60 60 67 / 0.12);
   --input: #e9e9ef;
-  --ring: #5856d6;
+  --ring: var(--accent-color);
 
   --surface-elevated: #e9e9ef;
   --hairline: rgb(60 60 67 / 0.12);
@@ -35,7 +35,7 @@
   --warning: #c77c00;
   --info: #1c9bb5;
   --surface-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 8px 24px -12px rgb(0 0 0 / 0.12);
-  --ambient-a: rgb(88 86 214 / 0.14);
+  --ambient-a: color-mix(in srgb, var(--accent-color) 14%, transparent);
   --ambient-b: rgb(48 176 199 / 0.12);
 }
 
@@ -59,7 +59,7 @@
   --destructive: #ff453a;
   --border: rgb(255 255 255 / 0.08);
   --input: #2c2c2e;
-  --ring: #7d7aff;
+  --ring: color-mix(in srgb, var(--accent-color), white 20%);
 
   --surface-elevated: #2c2c2e;
   --hairline: rgb(255 255 255 / 0.08);
@@ -68,9 +68,25 @@
   --warning: #ffb340;
   --info: #40c8e0;
   --surface-shadow: 0 0 0 1px rgb(255 255 255 / 0.06), 0 12px 32px -16px rgb(0 0 0 / 0.8);
-  --ambient-a: rgb(94 92 230 / 0.22);
+  --ambient-a: color-mix(in srgb, var(--accent-color) 22%, transparent);
   --ambient-b: rgb(64 200 224 / 0.12);
 }
+
+/* Accent presets (Settings → Appearance). Only the accent changes: green,
+   red and orange keep meaning income, expense and warning. Set on <html>, and
+   on any element (e.g. a swatch) that should show a preset's color. */
+[data-accent="indigo"] { --accent-color: #5856d6; }
+.dark[data-accent="indigo"], .dark [data-accent="indigo"] { --accent-color: #5e5ce6; }
+[data-accent="blue"] { --accent-color: #007aff; }
+.dark[data-accent="blue"], .dark [data-accent="blue"] { --accent-color: #0a84ff; }
+[data-accent="purple"] { --accent-color: #af52de; }
+.dark[data-accent="purple"], .dark [data-accent="purple"] { --accent-color: #bf5af2; }
+[data-accent="pink"] { --accent-color: #d63f8c; }
+.dark[data-accent="pink"], .dark [data-accent="pink"] { --accent-color: #ec5fa6; }
+[data-accent="teal"] { --accent-color: #0e8fa3; }
+.dark[data-accent="teal"], .dark [data-accent="teal"] { --accent-color: #3cbfd6; }
+[data-accent="graphite"] { --accent-color: #636366; }
+.dark[data-accent="graphite"], .dark [data-accent="graphite"] { --accent-color: #8e8e93; }
 
 @theme inline {
   --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, "Segoe UI", Roboto, sans-serif;
@@ -87,6 +103,7 @@
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
+  --color-accent-light: color-mix(in srgb, var(--accent-color), white 25%);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);

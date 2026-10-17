@@ -21,6 +21,7 @@ type AccountUpdate = components["schemas"]["AccountUpdate"]
 type RuleRead = components["schemas"]["RuleRead"]
 type RuleCreate = components["schemas"]["RuleCreate"]
 type ImportRead = components["schemas"]["ImportRead"]
+type TransactionCreate = components["schemas"]["TransactionCreate"]
 type TransactionUpdate = components["schemas"]["TransactionUpdate"]
 type TransactionBulkUpdate = components["schemas"]["TransactionBulkUpdate"]
 type AdminResetRequest = components["schemas"]["AdminResetRequest"]
@@ -339,8 +340,21 @@ export interface TransactionFilters {
   import_id?: number
   needs_review?: boolean
   q?: string
+  date_from?: string
+  date_to?: string
+  amount_min?: number
+  amount_max?: number
+  type?: "income" | "expense"
+  uncategorized?: boolean
+  source?: "manual" | "imported"
   page?: number
   page_size?: number
+}
+
+/** Any change to transactions also changes every stats aggregate. */
+function invalidateTransactionData(queryClient: ReturnType<typeof useQueryClient>) {
+  queryClient.invalidateQueries({ queryKey: ["transactions"] })
+  queryClient.invalidateQueries({ queryKey: ["stats"] })
 }
 
 export function useTransactions(filters: TransactionFilters) {
@@ -350,6 +364,24 @@ export function useTransactions(filters: TransactionFilters) {
       unwrap(
         await api.GET("/api/transactions", { params: { query: filters } }),
       ) as unknown as TransactionListResponse,
+  })
+}
+
+export function useCreateTransaction() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (payload: TransactionCreate) =>
+      unwrap(await api.POST("/api/transactions", { body: payload })),
+    onSuccess: () => invalidateTransactionData(queryClient),
+  })
+}
+
+export function useCreateTransactions() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (items: TransactionCreate[]) =>
+      unwrap(await api.POST("/api/transactions/batch", { body: { items } })),
+    onSuccess: () => invalidateTransactionData(queryClient),
   })
 }
 
@@ -363,7 +395,7 @@ export function useUpdateTransaction() {
           body: payload,
         }),
       ),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["transactions"] }),
+    onSuccess: () => invalidateTransactionData(queryClient),
   })
 }
 
@@ -372,7 +404,7 @@ export function useBulkUpdateTransactions() {
   return useMutation({
     mutationFn: async (payload: TransactionBulkUpdate) =>
       unwrap(await api.POST("/api/transactions/bulk", { body: payload })),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["transactions"] }),
+    onSuccess: () => invalidateTransactionData(queryClient),
   })
 }
 
@@ -385,7 +417,7 @@ export function useDeleteTransaction() {
           params: { path: { transaction_id: id } },
         }),
       ),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["transactions"] }),
+    onSuccess: () => invalidateTransactionData(queryClient),
   })
 }
 

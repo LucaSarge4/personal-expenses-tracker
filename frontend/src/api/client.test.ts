@@ -15,7 +15,7 @@ describe("unwrap", () => {
     try {
       run()
     } catch (e) {
-      expect((e as ApiError).message).toBe('"Account not found"')
+      expect((e as ApiError).message).toBe("Account not found")
       expect((e as ApiError).status).toBe(404)
     }
   })

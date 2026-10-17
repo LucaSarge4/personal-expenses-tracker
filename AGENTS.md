@@ -99,6 +99,11 @@ source of truth; `CLAUDE.md` just points here.
   server (LM Studio, llama.cpp, vLLM, ...). Qwen3 models are known to
   ignore both this and the `/no_think` prompt suffix on Ollama — expect
   full chain-of-thought latency with them.
+- Transactions added by hand (`POST /api/transactions`, `/batch`) have
+  `import_id = NULL` and a random `dedupe_hash` of the form `manual:<uuid>`,
+  so they never collide with statement lines. Editing a transaction never
+  recomputes its `dedupe_hash`: an imported row keeps the hash of its
+  original statement line, so re-importing that statement still skips it.
 - Aggregation (sums, totals, grids) happens only in the stats SQL queries
   (`api/stats.py`), never duplicated in the frontend.
 - Tests mock the LLM client; they never call a real LLM server.

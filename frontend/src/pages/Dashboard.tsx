@@ -84,7 +84,7 @@ export function Dashboard() {
   if (!checkingEmpty && anyTxns?.total === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-5 py-24 text-center">
-        <span className="flex size-16 items-center justify-center rounded-[18px] bg-gradient-to-br from-[#7d7aff] to-[#5856d6] text-white shadow-lg shadow-primary/25">
+        <span className="flex size-16 items-center justify-center rounded-[18px] bg-gradient-to-br from-accent-light to-primary text-white shadow-lg shadow-primary/25">
           <WalletCards className="size-8" />
         </span>
         <div className="flex flex-col gap-1.5">

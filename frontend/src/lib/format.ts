@@ -49,6 +49,22 @@ export function formatAmount(cents: number, locale: FormatLocale = "en"): string
   return AMOUNT_FORMATTERS[locale].format(Math.round(cents / 100))
 }
 
+/** Parses a typed amount ("12.50", "12,50", "1.234,56", "1,234.56", "€ 12")
+ * into positive cents, or null if it isn't a number. Works for both locales:
+ * the last separator followed by 1–2 digits is the decimal point, any other
+ * separator is grouping. The sign is ignored; callers decide the direction. */
+export function parseAmount(input: string): number | null {
+  const cleaned = input.replace(/[^\d.,]/g, "")
+  if (!/\d/.test(cleaned)) return null
+  const match = /^(.*?)([.,])(\d{1,2})$/.exec(cleaned)
+  const [whole, point, fraction] = match ? [match[1], match[2], match[3]] : [cleaned, "", ""]
+  // The decimal point can't also be the grouping separator ("12,345,6").
+  if (point && whole.includes(point)) return null
+  if (!/^\d{1,3}([.,]?\d{3})*$|^\d*$/.test(whole)) return null
+  const units = Number(whole.replace(/[.,]/g, "") || "0")
+  return units * 100 + Number(fraction.padEnd(2, "0"))
+}
+
 export function formatDate(isoDate: string, locale: FormatLocale = "en"): string {
   return DATE_FORMATTERS[locale].format(new Date(`${isoDate}T00:00:00`))
 }

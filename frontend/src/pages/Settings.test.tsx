@@ -79,4 +79,30 @@ describe("Settings page", () => {
       }),
     )
   })
+
+  it("applies an accent color right away and remembers it", async () => {
+    const user = userEvent.setup()
+    const { unmount } = renderWithProviders(<Settings />)
+    const accents = await screen.findByRole("radiogroup", { name: "Accent color" })
+    expect(within(accents).getByRole("radio", { name: "Indigo" })).toHaveAttribute("aria-checked", "true")
+
+    await user.click(within(accents).getByRole("radio", { name: "Teal" }))
+    expect(document.documentElement.dataset.accent).toBe("teal")
+    expect(within(accents).getByRole("radio", { name: "Teal" })).toHaveAttribute("aria-checked", "true")
+
+    unmount()
+    renderWithProviders(<Settings />)
+    const again = await screen.findByRole("radiogroup", { name: "Accent color" })
+    expect(within(again).getByRole("radio", { name: "Teal" })).toHaveAttribute("aria-checked", "true")
+  })
+
+  it("switches between light and dark", async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<Settings />)
+    const theme = await screen.findByRole("radiogroup", { name: "Theme" })
+    await user.click(within(theme).getByRole("radio", { name: "Dark" }))
+    expect(document.documentElement).toHaveClass("dark")
+    await user.click(within(theme).getByRole("radio", { name: "Light" }))
+    expect(document.documentElement).not.toHaveClass("dark")
+  })
 })

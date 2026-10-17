@@ -27,9 +27,11 @@ export function unwrap<T>({
   if (error !== undefined) {
     const detail =
       typeof error === "object" && error !== null && "detail" in error
-        ? JSON.stringify((error as { detail: unknown }).detail)
-        : String(error)
-    throw new ApiError(detail, response.status)
+        ? (error as { detail: unknown }).detail
+        : error
+    // FastAPI's own messages are plain strings; validation errors are lists.
+    const message = typeof detail === "string" ? detail : JSON.stringify(detail)
+    throw new ApiError(message, response.status)
   }
   if (data === undefined) {
     throw new ApiError("Empty response", response.status)
