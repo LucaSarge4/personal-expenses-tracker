@@ -133,7 +133,7 @@ function CategoryRow({
         <input
           type="color"
           defaultValue={category.color}
-          className="h-8 w-10 cursor-pointer rounded border border-input bg-transparent p-0.5"
+          className="h-8 w-10 cursor-pointer rounded-md border-0 bg-elevated p-1"
           onChange={(e) => onUpdate(category.id, { color: e.target.value })}
         />
       </TableCell>

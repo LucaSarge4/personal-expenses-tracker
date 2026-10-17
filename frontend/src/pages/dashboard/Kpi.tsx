@@ -8,30 +8,11 @@ import { cn } from "@/lib/utils"
 
 type Accent = "green" | "orange" | "blue" | "purple"
 
-const ACCENTS: Record<
-  Accent,
-  { icon: LucideIcon; iconClass: string; tintClass: string }
-> = {
-  green: {
-    icon: TrendingUp,
-    iconClass: "text-emerald-600 dark:text-emerald-400",
-    tintClass: "bg-emerald-500/10",
-  },
-  orange: {
-    icon: TrendingDown,
-    iconClass: "text-orange-600 dark:text-orange-400",
-    tintClass: "bg-orange-500/10",
-  },
-  blue: {
-    icon: Wallet,
-    iconClass: "text-blue-600 dark:text-blue-400",
-    tintClass: "bg-blue-500/10",
-  },
-  purple: {
-    icon: PiggyBank,
-    iconClass: "text-purple-600 dark:text-purple-400",
-    tintClass: "bg-purple-500/10",
-  },
+const ACCENTS: Record<Accent, { icon: LucideIcon; tileClass: string }> = {
+  green: { icon: TrendingUp, tileClass: "bg-income" },
+  orange: { icon: TrendingDown, tileClass: "bg-spend" },
+  blue: { icon: Wallet, tileClass: "bg-primary" },
+  purple: { icon: PiggyBank, tileClass: "bg-info" },
 }
 
 export function Kpi({
@@ -55,27 +36,27 @@ export function Kpi({
   const negative = delta !== null && delta < 0
   const good = goodDirection === "up" ? positive : negative
   const bad = goodDirection === "up" ? negative : positive
-  const { icon: Icon, iconClass, tintClass } = ACCENTS[accent]
+  const { icon: Icon, tileClass } = ACCENTS[accent]
 
   return (
-    <Card className="gap-3 py-5 transition-shadow hover:shadow-md">
-      <CardHeader className="flex-row items-center justify-between pb-0">
-        <CardTitle className="text-sm font-medium text-muted-foreground">{label}</CardTitle>
-        <span className={cn("flex size-8 items-center justify-center rounded-full", tintClass)}>
-          <Icon className={cn("size-4", iconClass)} />
+    <Card className="gap-4 py-5">
+      <CardHeader className="flex items-center gap-2.5">
+        <span className={cn("flex size-7 items-center justify-center rounded-[8px] text-white", tileClass)}>
+          <Icon className="size-4" />
         </span>
+        <CardTitle className="text-[13px] font-medium tracking-normal text-muted-foreground">{label}</CardTitle>
       </CardHeader>
-      <CardContent className="flex items-end justify-between">
-        <span className="text-3xl font-semibold tracking-tight tabular-nums">
+      <CardContent className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+        <span className="text-2xl leading-none font-semibold font-figures sm:text-[30px]">
           {isPercent ? formatPercent(cents) : formatMoney(cents)}
         </span>
         {delta !== null && (
           <span
             className={cn(
-              "flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-xs font-medium",
-              good && "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-              bad && "bg-red-500/10 text-red-600 dark:text-red-400",
-              !good && !bad && "text-muted-foreground",
+              "flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-semibold font-figures",
+              good && "bg-income/14 text-income",
+              bad && "bg-destructive/12 text-destructive",
+              !good && !bad && "bg-elevated text-muted-foreground",
             )}
           >
             {positive ? <ArrowUp className="size-3" /> : negative ? <ArrowDown className="size-3" /> : null}

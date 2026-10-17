@@ -38,6 +38,17 @@ export function formatMoney(
   return moneyFormatter(locale, currency).format(cents / 100)
 }
 
+const AMOUNT_FORMATTERS: Record<FormatLocale, Intl.NumberFormat> = {
+  en: new Intl.NumberFormat(INTL_LOCALE.en, { maximumFractionDigits: 0 }),
+  it: new Intl.NumberFormat(INTL_LOCALE.it, { maximumFractionDigits: 0 }),
+}
+
+/** Compact money for dense tables: no currency symbol, rounded to whole units.
+ * The caller states the currency once (e.g. in a caption). */
+export function formatAmount(cents: number, locale: FormatLocale = "en"): string {
+  return AMOUNT_FORMATTERS[locale].format(Math.round(cents / 100))
+}
+
 export function formatDate(isoDate: string, locale: FormatLocale = "en"): string {
   return DATE_FORMATTERS[locale].format(new Date(`${isoDate}T00:00:00`))
 }

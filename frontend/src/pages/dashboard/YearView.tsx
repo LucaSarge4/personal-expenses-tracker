@@ -15,28 +15,30 @@ import type { CSSProperties } from "react"
 import { Link } from "react-router-dom"
 
 import { useStatsByCategory, useStatsGrid, useStatsMonthly } from "@/api/hooks"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { MONTH_NAMES_SHORT } from "@/lib/format"
 import { useI18n } from "@/lib/i18n"
 import { CategoryGrid } from "@/pages/dashboard/CategoryGrid"
 
 const CHART_COLORS = {
-  income: "#34c759",
-  expenses: "#ff9500",
-  net: "#0a84ff",
+  income: "var(--income)",
+  expenses: "var(--spend)",
+  net: "var(--primary)",
 }
 
 const CHART_TOOLTIP_STYLE = {
   borderRadius: 12,
-  border: "1px solid var(--border)",
+  border: "1px solid var(--hairline)",
   backgroundColor: "var(--popover)",
+  backdropFilter: "blur(20px) saturate(1.5)",
   color: "var(--popover-foreground)",
-  boxShadow: "0 4px 16px rgb(0 0 0 / 0.1)",
+  boxShadow: "0 8px 24px rgb(0 0 0 / 0.14)",
   fontSize: 13,
+  padding: "8px 12px",
 }
 
 export function YearView({ year, accountId }: { year: number; accountId?: number }) {
-  const { t, locale, formatMoney } = useI18n()
+  const { t, locale, currency, formatMoney } = useI18n()
   const { data: monthly, isLoading: monthlyLoading } = useStatsMonthly({
     year,
     account_id: accountId,
@@ -69,7 +71,7 @@ export function YearView({ year, accountId }: { year: number; accountId?: number
     <div className="flex flex-col gap-6">
       <Card className="overflow-hidden">
         <CardHeader>
-          <CardTitle className="text-base">{t("dashboard.incomeVsExpenses")}</CardTitle>
+          <CardTitle>{t("dashboard.incomeVsExpenses")}</CardTitle>
         </CardHeader>
         <CardContent>
           {monthlyLoading ? (
@@ -77,7 +79,7 @@ export function YearView({ year, accountId }: { year: number; accountId?: number
           ) : (
             <ResponsiveContainer width="100%" height={280}>
               <ComposedChart data={chartData} barGap={4}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-border/60" />
+                <CartesianGrid vertical={false} stroke="var(--hairline)" />
                 <XAxis
                   dataKey="month"
                   fontSize={12}
@@ -96,7 +98,7 @@ export function YearView({ year, accountId }: { year: number; accountId?: number
                 <Tooltip
                   formatter={(value) => formatMoney(Number(value) * 100)}
                   contentStyle={CHART_TOOLTIP_STYLE}
-                  cursor={{ fill: "var(--muted)", opacity: 0.4 }}
+                  cursor={{ fill: "var(--accent)" }}
                 />
                 <Bar dataKey="Income" fill={CHART_COLORS.income} radius={[6, 6, 0, 0]} maxBarSize={28} />
                 <Bar dataKey="Expenses" fill={CHART_COLORS.expenses} radius={[6, 6, 0, 0]} maxBarSize={28} />
@@ -106,7 +108,7 @@ export function YearView({ year, accountId }: { year: number; accountId?: number
                   stroke={CHART_COLORS.net}
                   strokeWidth={2.5}
                   dot={false}
-                  activeDot={{ r: 5 }}
+                  activeDot={{ r: 5, strokeWidth: 2, stroke: "var(--background)" }}
                 />
               </ComposedChart>
             </ResponsiveContainer>
@@ -116,7 +118,7 @@ export function YearView({ year, accountId }: { year: number; accountId?: number
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">{t("dashboard.expensesByCategory")}</CardTitle>
+          <CardTitle>{t("dashboard.expensesByCategory")}</CardTitle>
         </CardHeader>
         <CardContent>
           {byCategoryLoading ? (
@@ -125,18 +127,20 @@ export function YearView({ year, accountId }: { year: number; accountId?: number
             <p className="text-sm text-muted-foreground">{t("dashboard.noExpensesThisYear")}</p>
           ) : (
             <div className="flex flex-col items-center gap-4 sm:flex-row">
-              <ResponsiveContainer width="100%" height={260} className="sm:max-w-xs">
+              <div className="relative w-full sm:max-w-xs">
+              <ResponsiveContainer width="100%" height={260}>
                 <PieChart>
                   <Pie
                     data={expenseSlices}
                     dataKey="value"
                     nameKey="name"
-                    innerRadius={60}
+                    innerRadius={74}
                     outerRadius={110}
-                    paddingAngle={1}
+                    paddingAngle={1.5}
+                    cornerRadius={4}
                   >
                     {expenseSlices.map((entry) => (
-                      <Cell key={entry.name} fill={entry.color} stroke="var(--card)" strokeWidth={2} />
+                      <Cell key={entry.name} fill={entry.color} stroke="var(--background)" strokeWidth={2} />
                     ))}
                   </Pie>
                   <Tooltip
@@ -145,6 +149,11 @@ export function YearView({ year, accountId }: { year: number; accountId?: number
                   />
                 </PieChart>
               </ResponsiveContainer>
+                <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-xs text-muted-foreground">{t("dashboard.kpiExpenses")}</span>
+                  <span className="text-lg font-semibold font-figures">{formatMoney(totalExpenses)}</span>
+                </div>
+              </div>
               <ul className="w-full flex-1 space-y-1 text-sm">
                 {expenseSlices.map((s) => (
                   <li key={s.name}>
@@ -159,7 +168,7 @@ export function YearView({ year, accountId }: { year: number; accountId?: number
                         />
                         <span className="min-w-0 truncate font-medium">{s.name}</span>
                       </span>
-                      <span className="shrink-0 whitespace-nowrap tabular-nums text-muted-foreground">
+                      <span className="shrink-0 whitespace-nowrap font-figures text-muted-foreground">
                         {formatMoney(s.value)} ·{" "}
                         {totalExpenses ? Math.round((s.value / totalExpenses) * 100) : 0}%
                       </span>
@@ -174,7 +183,8 @@ export function YearView({ year, accountId }: { year: number; accountId?: number
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">{t("dashboard.categoryByMonth")}</CardTitle>
+          <CardTitle>{t("dashboard.categoryByMonth")}</CardTitle>
+          <CardDescription>{t("dashboard.gridCaption", { currency })}</CardDescription>
         </CardHeader>
         <CardContent>
           {gridLoading ? (

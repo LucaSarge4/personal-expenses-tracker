@@ -2,58 +2,84 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Apple system palette. Surfaces are separated by elevation and blur rather
+   than borders; color is reserved for meaning (accent = action/selection,
+   income/spend/destructive = money direction). */
 :root {
-  --radius: 0.85rem;
-  --background: oklch(0.97 0.002 264);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --accent-color: oklch(0.58 0.21 259);
-  --accent-color-foreground: oklch(0.985 0 0);
+  --radius: 0.75rem;
+  --background: #f2f2f7;
+  --foreground: #1d1d1f;
+  --card: rgb(255 255 255 / 0.82);
+  --card-foreground: #1d1d1f;
+  --popover: rgb(255 255 255 / 0.9);
+  --popover-foreground: #1d1d1f;
+  --accent-color: #5856d6;
+  --accent-color-foreground: #ffffff;
   --primary: var(--accent-color);
   --primary-foreground: var(--accent-color-foreground);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.7 0.15 259);
+  --secondary: #e9e9ef;
+  --secondary-foreground: #1d1d1f;
+  --muted: #e9e9ef;
+  --muted-foreground: #6e6e73;
+  --accent: rgb(120 120 128 / 0.12);
+  --accent-foreground: #1d1d1f;
+  --destructive: #ff3b30;
+  --border: rgb(60 60 67 / 0.12);
+  --input: #e9e9ef;
+  --ring: #5856d6;
+
+  --surface-elevated: #e9e9ef;
+  --hairline: rgb(60 60 67 / 0.12);
+  --income: #28a745;
+  --spend: #f08300;
+  --warning: #c77c00;
+  --info: #1c9bb5;
+  --surface-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 8px 24px -12px rgb(0 0 0 / 0.12);
+  --ambient-a: rgb(88 86 214 / 0.14);
+  --ambient-b: rgb(48 176 199 / 0.12);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --accent-color: oklch(0.68 0.18 259);
-  --accent-color-foreground: oklch(0.145 0 0);
+  --background: #000000;
+  --foreground: #f5f5f7;
+  --card: rgb(28 28 30 / 0.78);
+  --card-foreground: #f5f5f7;
+  --popover: rgb(36 36 38 / 0.92);
+  --popover-foreground: #f5f5f7;
+  --accent-color: #5e5ce6;
+  --accent-color-foreground: #ffffff;
   --primary: var(--accent-color);
   --primary-foreground: var(--accent-color-foreground);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.68 0.18 259);
+  --secondary: #2c2c2e;
+  --secondary-foreground: #f5f5f7;
+  --muted: #2c2c2e;
+  --muted-foreground: #98989d;
+  --accent: rgb(120 120 128 / 0.24);
+  --accent-foreground: #f5f5f7;
+  --destructive: #ff453a;
+  --border: rgb(255 255 255 / 0.08);
+  --input: #2c2c2e;
+  --ring: #7d7aff;
+
+  --surface-elevated: #2c2c2e;
+  --hairline: rgb(255 255 255 / 0.08);
+  --income: #30d158;
+  --spend: #ff9f0a;
+  --warning: #ffb340;
+  --info: #40c8e0;
+  --surface-shadow: 0 0 0 1px rgb(255 255 255 / 0.06), 0 12px 32px -16px rgb(0 0 0 / 0.8);
+  --ambient-a: rgb(94 92 230 / 0.22);
+  --ambient-b: rgb(64 200 224 / 0.12);
 }
 
 @theme inline {
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, "Segoe UI", Roboto, sans-serif;
+  --font-figures: ui-rounded, "SF Pro Rounded", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 6px);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -72,6 +98,13 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-elevated: var(--surface-elevated);
+  --color-hairline: var(--hairline);
+  --color-income: var(--income);
+  --color-spend: var(--spend);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+  --shadow-surface: var(--surface-shadow);
 }
 
 body {
@@ -82,7 +115,39 @@ body {
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background font-sans text-[14px] text-foreground;
+    letter-spacing: -0.006em;
+  }
+  ::selection {
+    background: color-mix(in srgb, var(--primary) 28%, transparent);
+  }
+}
+
+@utility font-figures {
+  font-family: var(--font-figures);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* The one decorative element: a soft color field the frosted surfaces sit on. */
+@utility ambient-field {
+  background:
+    radial-gradient(60rem 40rem at 85% -10%, var(--ambient-a), transparent 60%),
+    radial-gradient(50rem 36rem at 10% 110%, var(--ambient-b), transparent 60%),
+    var(--background);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

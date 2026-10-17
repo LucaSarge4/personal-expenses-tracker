@@ -21,11 +21,13 @@ import { cn } from "@/lib/utils"
 
 const CHART_TOOLTIP_STYLE = {
   borderRadius: 12,
-  border: "1px solid var(--border)",
+  border: "1px solid var(--hairline)",
   backgroundColor: "var(--popover)",
+  backdropFilter: "blur(20px) saturate(1.5)",
   color: "var(--popover-foreground)",
-  boxShadow: "0 4px 16px rgb(0 0 0 / 0.1)",
+  boxShadow: "0 8px 24px rgb(0 0 0 / 0.14)",
   fontSize: 13,
+  padding: "8px 12px",
 }
 
 export function MonthView({
@@ -86,7 +88,7 @@ export function MonthView({
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">{t("dashboard.expensesByCategory")}</CardTitle>
+            <CardTitle>{t("dashboard.expensesByCategory")}</CardTitle>
           </CardHeader>
           <CardContent>
             {byCategoryLoading ? (
@@ -96,8 +98,9 @@ export function MonthView({
                 {t("dashboard.noExpensesInMonth", { month: monthName(month, locale), year })}
               </p>
             ) : (
-              <div className="flex items-center gap-4">
-                <ResponsiveContainer width="50%" height={220}>
+              <div className="flex flex-col items-center gap-4 sm:flex-row">
+                <div className="w-full sm:w-1/2">
+                <ResponsiveContainer width="100%" height={220}>
                   <PieChart>
                     <Pie
                       data={expenseSlices}
@@ -105,10 +108,11 @@ export function MonthView({
                       nameKey="name"
                       innerRadius={50}
                       outerRadius={90}
-                      paddingAngle={1}
+                      paddingAngle={1.5}
+                    cornerRadius={4}
                     >
                       {expenseSlices.map((entry) => (
-                        <Cell key={entry.name} fill={entry.color} stroke="var(--card)" strokeWidth={2} />
+                        <Cell key={entry.name} fill={entry.color} stroke="var(--background)" strokeWidth={2} />
                       ))}
                     </Pie>
                     <Tooltip
@@ -117,7 +121,8 @@ export function MonthView({
                     />
                   </PieChart>
                 </ResponsiveContainer>
-                <ul className="flex-1 space-y-1 text-sm">
+                </div>
+                <ul className="w-full flex-1 space-y-1 text-sm">
                   {expenseSlices.map((s) => (
                     <li key={s.name}>
                       <Link
@@ -131,7 +136,7 @@ export function MonthView({
                           />
                           <span className="min-w-0 truncate font-medium">{s.name}</span>
                         </span>
-                        <span className="shrink-0 whitespace-nowrap tabular-nums text-muted-foreground">
+                        <span className="shrink-0 whitespace-nowrap font-figures text-muted-foreground">
                           {formatMoney(s.value)} ·{" "}
                           {totalExpenses ? Math.round((s.value / totalExpenses) * 100) : 0}%
                         </span>
@@ -146,7 +151,7 @@ export function MonthView({
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">{t("dashboard.topMerchants")}</CardTitle>
+            <CardTitle>{t("dashboard.topMerchants")}</CardTitle>
           </CardHeader>
           <CardContent>
             {txnsLoading ? (
@@ -162,7 +167,7 @@ export function MonthView({
                       className="-mx-1 flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-accent/60"
                     >
                       <span className="min-w-0 flex-1 truncate font-medium">{m.label || "—"}</span>
-                      <span className="shrink-0 whitespace-nowrap tabular-nums text-muted-foreground">
+                      <span className="shrink-0 whitespace-nowrap font-figures text-muted-foreground">
                         {formatMoney(m.cents)}
                       </span>
                     </Link>
@@ -176,7 +181,7 @@ export function MonthView({
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">
+          <CardTitle>
             {t("dashboard.transactions")}{" "}
             <Link
               to={`/transactions?year=${year}&month=${month}${accountId ? `&account_id=${accountId}` : ""}`}
@@ -211,10 +216,10 @@ export function MonthView({
                     </TableCell>
                     <TableCell
                       className={cn(
-                        "text-right font-mono whitespace-nowrap",
+                        "text-right font-figures whitespace-nowrap",
                         t.amount_cents < 0
                           ? "text-foreground"
-                          : "text-emerald-600 dark:text-emerald-400",
+                          : "text-income",
                       )}
                     >
                       {formatMoney(t.amount_cents)}

@@ -14,7 +14,9 @@ import {
 import type { TransactionRead } from "@/api/types"
 import { BulkApplyDialog } from "@/components/bulk-apply-dialog"
 import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
+import { PageHeader } from "@/components/page-header"
 import { ConfirmDeleteDialog } from "@/components/confirm-delete-dialog"
 import { ExpandableText } from "@/components/expandable-text"
 import { Input } from "@/components/ui/input"
@@ -205,7 +207,7 @@ export function Transactions() {
           })
         }}
       />
-      <h1 className="text-2xl font-semibold">{t("transactions.title")}</h1>
+      <PageHeader title={t("transactions.title")} />
 
       <div className="flex flex-wrap items-center gap-2">
         <Input
@@ -269,7 +271,7 @@ export function Transactions() {
       </div>
 
       {selected.size > 0 && (
-        <div className="flex items-center gap-2 rounded-md border bg-accent/40 px-3 py-2 text-sm">
+        <div className="flex flex-wrap items-center gap-2 rounded-xl bg-primary/10 px-3 py-2 text-sm font-medium">
           <span>{tn("transactions.selectedCount", selected.size)}</span>
           <Select value={bulkCategory} onValueChange={setBulkCategory}>
             <SelectTrigger className="h-8 w-48">
@@ -313,7 +315,7 @@ export function Transactions() {
       ) : !data?.items.length ? (
         <p className="text-sm text-muted-foreground">{t("transactions.noMatches")}</p>
       ) : (
-        <>
+        <Card className="gap-0 py-2">
           <Table>
             <TableHeader>
               <TableRow>
@@ -333,7 +335,7 @@ export function Transactions() {
             </TableHeader>
             <TableBody>
               {data.items.map((txn) => (
-                <TableRow key={txn.id} className={cn(!txn.reviewed && "bg-amber-500/5")}>
+                <TableRow key={txn.id} className={cn(!txn.reviewed && "bg-warning/6")}>
                   <TableCell>
                     <Checkbox
                       checked={selected.has(txn.id)}
@@ -348,8 +350,8 @@ export function Transactions() {
                   </TableCell>
                   <TableCell
                     className={cn(
-                      "text-right font-mono whitespace-nowrap",
-                      txn.amount_cents < 0 ? "text-foreground" : "text-emerald-600",
+                      "text-right font-figures whitespace-nowrap",
+                      txn.amount_cents < 0 ? "text-foreground" : "text-income",
                     )}
                   >
                     {formatMoney(txn.amount_cents)}
@@ -390,7 +392,7 @@ export function Transactions() {
                         )
                       }}
                     >
-                      <SelectTrigger className="h-8 w-44">
+                      <SelectTrigger className="h-8 w-44 bg-transparent hover:bg-elevated">
                         <SelectValue>{categoryName(txn.category_id)}</SelectValue>
                       </SelectTrigger>
                       <SelectContent>
@@ -421,10 +423,9 @@ export function Transactions() {
             </TableBody>
           </Table>
 
-          <div className="flex items-center justify-between text-sm text-muted-foreground">
-            <span>
-              {tn("transactions.totalCount", data.total)} ·{" "}
-              {t("transactions.pageOf", { page, totalPages })}
+          <div className="flex items-center justify-between border-t border-hairline px-4 pt-3 pb-1 text-sm text-muted-foreground">
+            <span className="font-figures">
+              {tn("transactions.totalCount", data.total)}, {t("transactions.pageOf", { page, totalPages })}
             </span>
             <div className="flex gap-2">
               <Button
@@ -445,7 +446,7 @@ export function Transactions() {
               </Button>
             </div>
           </div>
-        </>
+        </Card>
       )}
     </div>
   )

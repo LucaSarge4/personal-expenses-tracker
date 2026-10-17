@@ -1,13 +1,20 @@
+import type { CSSProperties } from "react"
 import { Link } from "react-router-dom"
 
 import type { GridResponse, GridRow, GroupSubtotal } from "@/api/types"
-import { MONTH_NAMES_SHORT } from "@/lib/format"
+import { MONTH_NAMES_SHORT, formatAmount } from "@/lib/format"
 import { useI18n } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
 
 type LineItem =
   | { kind: "row"; row: GridRow }
   | { kind: "subtotal"; subtotal: GroupSubtotal }
+
+// Expense rows are negative cents; inside the "Expenses" section the sign is
+// redundant noise, so they're displayed flipped (a refund then shows as negative).
+type Section = "income" | "expense"
+
+const STICKY_CELL = "sticky left-0 z-10 bg-white dark:bg-[#1c1c1e]"
 
 function withSubtotals(rows: GridRow[], subtotals: GroupSubtotal[]): LineItem[] {
   const byGroup = new Map(subtotals.map((s) => [s.group, s]))
@@ -23,16 +30,43 @@ function withSubtotals(rows: GridRow[], subtotals: GroupSubtotal[]): LineItem[] 
   return items
 }
 
-function Cell({ value, href }: { value: number; href?: string }) {
-  const { formatMoney } = useI18n()
+function Cell({
+  value,
+  section,
+  href,
+  tint,
+  idle,
+}: {
+  value: number
+  section?: Section
+  href?: string
+  /** Row color plus this cell's share of the row's largest month, for the heat tint. */
+  tint?: { color: string; share: number }
+  /** A month with no data at all (e.g. the future): keep it visually quiet. */
+  idle?: boolean
+}) {
+  const { locale } = useI18n()
   if (value === 0) {
-    return <td className="px-2 py-1 text-right text-sm text-muted-foreground/60">–</td>
+    return (
+      <td className={cn("px-2 py-1.5 text-right text-sm text-muted-foreground/40", idle && "px-1")}>
+        –
+      </td>
+    )
   }
-  const content = formatMoney(value)
+  const shown = section === "expense" ? -value : value
+  const content = formatAmount(shown, locale)
+  const style = tint
+    ? ({
+        backgroundColor: `color-mix(in srgb, ${tint.color} ${Math.round(4 + tint.share * 20)}%, transparent)`,
+      } as CSSProperties)
+    : undefined
   return (
-    <td className="px-2 py-1 text-right text-sm tabular-nums">
+    <td
+      className={cn("px-2 py-1.5 text-right text-sm font-figures", shown < 0 && "text-destructive")}
+      style={style}
+    >
       {href ? (
-        <Link to={href} className="hover:underline">
+        <Link to={href} className="rounded-sm outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring/50">
           {content}
         </Link>
       ) : (
@@ -44,52 +78,78 @@ function Cell({ value, href }: { value: number; href?: string }) {
 
 function SectionRows({
   items,
+  section,
   year,
   totalLabel,
+  idleMonths,
 }: {
   items: LineItem[]
+  section: Section
   year: number
   totalLabel: string
+  idleMonths: boolean[]
 }) {
   return (
     <>
-      {items.map((item, idx) =>
-        item.kind === "row" ? (
-          <tr key={`row-${item.row.category_id}`} className="border-b border-border/50">
-            <td className="sticky left-0 z-10 bg-background px-2 py-1 text-sm">
+      {items.map((item, idx) => {
+        if (item.kind === "subtotal") {
+          return (
+            <tr
+              key={`subtotal-${item.subtotal.group}-${idx}`}
+              className="border-b border-hairline text-muted-foreground"
+            >
+              <td className={cn(STICKY_CELL, "py-1.5 pr-2 pl-6 text-[13px] font-medium")}>
+                {totalLabel} {item.subtotal.group}
+              </td>
+              {item.subtotal.months.map((value, m) => (
+                <Cell key={m} value={value} section={section} idle={idleMonths[m]} />
+              ))}
+              <Cell value={item.subtotal.total} section={section} />
+            </tr>
+          )
+        }
+        const { row } = item
+        const rowMax = Math.max(...row.months.map(Math.abs))
+        return (
+          <tr key={`row-${row.category_id}`} className="border-b border-hairline">
+            <td className={cn(STICKY_CELL, "px-2 py-1.5 text-sm whitespace-nowrap")}>
               <span
-                className="mr-1.5 inline-block size-2 rounded-full align-middle"
-                style={{ backgroundColor: item.row.color }}
+                className="mr-2 inline-block size-2 rounded-full align-middle"
+                style={{ backgroundColor: row.color }}
               />
-              {item.row.name}
+              {row.name}
             </td>
-            {item.row.months.map((value, m) => (
+            {row.months.map((value, m) => (
               <Cell
                 key={m}
                 value={value}
+                section={section}
+                idle={idleMonths[m]}
+                tint={rowMax ? { color: row.color, share: Math.abs(value) / rowMax } : undefined}
                 href={
                   value !== 0
-                    ? `/transactions?year=${year}&month=${m + 1}&category_id=${item.row.category_id}`
+                    ? `/transactions?year=${year}&month=${m + 1}&category_id=${row.category_id}`
                     : undefined
                 }
               />
             ))}
-            <Cell value={item.row.total} />
-          </tr>
-        ) : (
-          <tr key={`subtotal-${item.subtotal.group}-${idx}`} className="border-b bg-muted/50 font-medium">
-            <td className="sticky left-0 z-10 bg-muted/50 px-2 py-1 text-sm">
-              {totalLabel} {item.subtotal.group}
+            <td className="px-2 py-1.5 text-right text-sm font-semibold font-figures">
+              {row.total !== 0 ? (
+                <TotalAmount value={section === "expense" ? -row.total : row.total} />
+              ) : (
+                <span className="text-muted-foreground/40">–</span>
+              )}
             </td>
-            {item.subtotal.months.map((value, m) => (
-              <Cell key={m} value={value} />
-            ))}
-            <Cell value={item.subtotal.total} />
           </tr>
-        ),
-      )}
+        )
+      })}
     </>
   )
+}
+
+function TotalAmount({ value }: { value: number }) {
+  const { locale } = useI18n()
+  return <span className={cn(value < 0 && "text-destructive")}>{formatAmount(value, locale)}</span>
 }
 
 export function CategoryGrid({ grid, year }: { grid: GridResponse; year: number }) {
@@ -103,56 +163,66 @@ export function CategoryGrid({ grid, year }: { grid: GridResponse; year: number 
   const incomeItems = withSubtotals(grid.income_rows, incomeSubtotals)
   const expenseItems = withSubtotals(grid.expense_rows, expenseSubtotals)
   const totalLabel = t("dashboard.groupTotal")
+  const allRows = [...grid.income_rows, ...grid.expense_rows]
+  const idleMonths = grid.month_totals.map((_, m) => allRows.every((r) => r.months[m] === 0))
+
+  const sectionHeading = (label: string) => (
+    <tr>
+      <td colSpan={14} className={cn(STICKY_CELL, "px-2 pt-5 pb-1.5 text-[13px] font-semibold")}>
+        {label}
+      </td>
+    </tr>
+  )
 
   return (
-    <div className="overflow-x-auto rounded-md border">
-      <table className="w-full min-w-[900px] border-collapse">
+    <div className="-mx-1 overflow-x-auto">
+      <table className="w-full min-w-[860px] border-collapse">
         <thead>
-          <tr className="border-b bg-muted/30">
-            <th className="sticky left-0 z-10 bg-muted/30 px-2 py-1.5 text-left text-xs font-medium text-muted-foreground">
+          <tr className="border-b border-hairline">
+            <th className={cn(STICKY_CELL, "min-w-44 px-2 py-2 text-left text-xs font-medium text-muted-foreground")}>
               {t("common.category")}
             </th>
-            {MONTH_NAMES_SHORT[locale].map((m) => (
-              <th key={m} className="px-2 py-1.5 text-right text-xs font-medium text-muted-foreground">
+            {MONTH_NAMES_SHORT[locale].map((m, i) => (
+              <th
+                key={m}
+                className={cn(
+                  "px-2 py-2 text-right text-xs font-medium text-muted-foreground",
+                  idleMonths[i] && "px-1 text-muted-foreground/50",
+                )}
+              >
                 {m}
               </th>
             ))}
-            <th className="px-2 py-1.5 text-right text-xs font-medium text-muted-foreground">
+            <th className="px-2 py-2 text-right text-xs font-semibold text-foreground">
               {t("common.total")}
             </th>
           </tr>
         </thead>
         <tbody>
-          {incomeItems.length > 0 && (
-            <tr>
-              <td
-                colSpan={14}
-                className="sticky left-0 bg-background px-2 pt-3 pb-1 text-xs font-semibold uppercase text-muted-foreground"
-              >
-                {t("dashboard.kpiIncome")}
-              </td>
-            </tr>
-          )}
-          <SectionRows items={incomeItems} year={year} totalLabel={totalLabel} />
-          {expenseItems.length > 0 && (
-            <tr>
-              <td
-                colSpan={14}
-                className="sticky left-0 bg-background px-2 pt-3 pb-1 text-xs font-semibold uppercase text-muted-foreground"
-              >
-                {t("dashboard.kpiExpenses")}
-              </td>
-            </tr>
-          )}
-          <SectionRows items={expenseItems} year={year} totalLabel={totalLabel} />
-          <tr className={cn("border-t-2 font-semibold")}>
-            <td className="sticky left-0 z-10 bg-background px-2 py-1.5 text-sm">
-              {t("common.total")}
-            </td>
+          {incomeItems.length > 0 && sectionHeading(t("dashboard.kpiIncome"))}
+          <SectionRows items={incomeItems} section="income" year={year} totalLabel={totalLabel} idleMonths={idleMonths} />
+          {expenseItems.length > 0 && sectionHeading(t("dashboard.kpiExpenses"))}
+          <SectionRows items={expenseItems} section="expense" year={year} totalLabel={totalLabel} idleMonths={idleMonths} />
+          <tr className="border-t border-foreground/15 font-semibold">
+            <td className={cn(STICKY_CELL, "px-2 py-2.5 text-sm")}>{t("dashboard.gridNet")}</td>
             {grid.month_totals.map((value, m) => (
-              <Cell key={m} value={value} />
+              <td key={m} className={cn("px-2 py-2.5 text-right text-sm font-figures", idleMonths[m] && "px-1")}>
+                {value === 0 ? (
+                  <span className="text-muted-foreground/40">–</span>
+                ) : (
+                  <span className={value > 0 ? "text-income" : "text-destructive"}>
+                    {value > 0 ? "+" : ""}
+                    {formatAmount(value, locale)}
+                  </span>
+                )}
+              </td>
             ))}
-            <Cell value={grid.year_total} />
+            <td className="px-2 py-2.5 text-right text-sm font-figures">
+              <span className={grid.year_total >= 0 ? "text-income" : "text-destructive"}>
+                {grid.year_total > 0 ? "+" : ""}
+                {formatAmount(grid.year_total, locale)}
+              </span>
+            </td>
           </tr>
         </tbody>
       </table>

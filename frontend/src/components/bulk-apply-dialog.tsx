@@ -77,7 +77,7 @@ export function BulkApplyDialog({
             onChange={(e) => setSnippet(e.target.value)}
             className="font-mono text-sm"
           />
-          <div className="max-h-40 w-full min-w-0 overflow-y-auto overflow-x-hidden rounded-md border text-sm">
+          <div className="max-h-40 w-full min-w-0 overflow-y-auto overflow-x-hidden rounded-xl bg-elevated/50 text-sm">
             {matches.length === 0 ? (
               <p className="p-2 text-muted-foreground">{t("bulkApply.noMatches")}</p>
             ) : (

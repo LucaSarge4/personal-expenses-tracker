@@ -60,7 +60,7 @@ function RuleSuggestion({
   const createRule = useCreateRule()
 
   return (
-    <div className="flex flex-col gap-2 rounded-md border bg-muted/40 p-3 text-sm">
+    <div className="flex flex-col gap-2 rounded-xl bg-elevated/60 p-3 text-sm">
       <p className="text-muted-foreground">
         {t("review.ruleSuggestionQuestion")}{" "}
         <span className="font-medium text-foreground">{categoryName}</span>?
@@ -160,15 +160,15 @@ export function ReviewTable({
           )
           return (
             <Fragment key={txn.id}>
-              <TableRow className={cn(lowConfidence && "bg-amber-500/10")}>
+              <TableRow className={cn(lowConfidence && "bg-warning/8")}>
                 <TableCell className="whitespace-nowrap">{formatDate(txn.date, locale)}</TableCell>
                 <TableCell className="max-w-xs">
                   <ExpandableText text={txn.description_raw} />
                 </TableCell>
                 <TableCell
                   className={cn(
-                    "text-right font-mono whitespace-nowrap",
-                    txn.amount_cents < 0 ? "text-foreground" : "text-emerald-600",
+                    "text-right font-figures whitespace-nowrap",
+                    txn.amount_cents < 0 ? "text-foreground" : "text-income",
                   )}
                 >
                   {formatMoney(txn.amount_cents)}
@@ -203,7 +203,7 @@ export function ReviewTable({
                       )
                     }}
                   >
-                    <SelectTrigger className="h-8 w-44">
+                    <SelectTrigger className="h-8 w-44 bg-transparent hover:bg-elevated">
                       <SelectValue placeholder={t("common.uncategorized")} />
                     </SelectTrigger>
                     <SelectContent>

@@ -1,7 +1,8 @@
-import { ChevronLeft, ChevronRight, Upload } from "lucide-react"
+import { ChevronLeft, ChevronRight, Upload, WalletCards } from "lucide-react"
 import { Link, useSearchParams } from "react-router-dom"
 
 import { useAccounts, useStatsSummary, useTransactions } from "@/api/hooks"
+import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import {
   Select,
@@ -82,12 +83,17 @@ export function Dashboard() {
 
   if (!checkingEmpty && anyTxns?.total === 0) {
     return (
-      <div className="flex flex-col items-center justify-center gap-4 py-24 text-center">
-        <h1 className="text-2xl font-semibold">{t("dashboard.emptyTitle")}</h1>
-        <p className="max-w-sm text-sm text-muted-foreground">{t("dashboard.emptyDescription")}</p>
-        <Button asChild>
+      <div className="flex flex-col items-center justify-center gap-5 py-24 text-center">
+        <span className="flex size-16 items-center justify-center rounded-[18px] bg-gradient-to-br from-[#7d7aff] to-[#5856d6] text-white shadow-lg shadow-primary/25">
+          <WalletCards className="size-8" />
+        </span>
+        <div className="flex flex-col gap-1.5">
+          <h1 className="text-[30px] leading-tight font-bold tracking-[-0.025em]">{t("dashboard.emptyTitle")}</h1>
+          <p className="max-w-sm text-sm text-muted-foreground">{t("dashboard.emptyDescription")}</p>
+        </div>
+        <Button asChild size="lg">
           <Link to="/import">
-            <Upload className="mr-1.5 size-4" />
+            <Upload className="size-4" />
             {t("dashboard.emptyCta")}
           </Link>
         </Button>
@@ -97,44 +103,46 @@ export function Dashboard() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight">{t("dashboard.title")}</h1>
-        <div className="flex flex-wrap items-center gap-2">
-          <Tabs value={period} onValueChange={(v) => setParam("period", v === "year" ? null : v)}>
-            <TabsList>
-              <TabsTrigger value="year">{t("dashboard.periodYear")}</TabsTrigger>
-              <TabsTrigger value="month">{t("dashboard.periodMonth")}</TabsTrigger>
-            </TabsList>
-          </Tabs>
-          <div className="flex items-center gap-1">
-            <Button variant="outline" size="icon" className="size-8" onClick={goPrev}>
-              <ChevronLeft className="size-4" />
-            </Button>
-            <span className="w-32 text-center text-sm font-medium">
-              {period === "year" ? year : `${monthName(month, locale)} ${year}`}
-            </span>
-            <Button variant="outline" size="icon" className="size-8" onClick={goNext}>
-              <ChevronRight className="size-4" />
-            </Button>
-          </div>
-          <Select value={accountIdParam ?? ALL} onValueChange={(v) => setParam("account_id", v)}>
-            <SelectTrigger className="w-44">
-              <SelectValue placeholder={t("common.allAccounts")} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={ALL}>{t("common.allAccounts")}</SelectItem>
-              {accounts?.map((a) => (
-                <SelectItem key={a.id} value={String(a.id)}>
-                  {a.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
+      <PageHeader
+        title={t("dashboard.title")}
+        actions={
+          <>
+            <Tabs value={period} onValueChange={(v) => setParam("period", v === "year" ? null : v)}>
+              <TabsList>
+                <TabsTrigger value="year">{t("dashboard.periodYear")}</TabsTrigger>
+                <TabsTrigger value="month">{t("dashboard.periodMonth")}</TabsTrigger>
+              </TabsList>
+            </Tabs>
+            <div className="flex h-9 items-center rounded-[10px] bg-elevated p-[2px]">
+              <Button variant="ghost" size="icon-sm" className="h-full rounded-[8px]" onClick={goPrev} aria-label={t("common.previous")}>
+                <ChevronLeft className="size-4" />
+              </Button>
+              <span className="w-32 text-center text-[13px] font-semibold font-figures">
+                {period === "year" ? year : `${monthName(month, locale)} ${year}`}
+              </span>
+              <Button variant="ghost" size="icon-sm" className="h-full rounded-[8px]" onClick={goNext} aria-label={t("common.next")}>
+                <ChevronRight className="size-4" />
+              </Button>
+            </div>
+            <Select value={accountIdParam ?? ALL} onValueChange={(v) => setParam("account_id", v)}>
+              <SelectTrigger className="w-44">
+                <SelectValue placeholder={t("common.allAccounts")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL}>{t("common.allAccounts")}</SelectItem>
+                {accounts?.map((a) => (
+                  <SelectItem key={a.id} value={String(a.id)}>
+                    {a.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </>
+        }
+      />
 
       {summary && (
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           <Kpi
             label={t("dashboard.kpiIncome")}
             cents={summary.income}

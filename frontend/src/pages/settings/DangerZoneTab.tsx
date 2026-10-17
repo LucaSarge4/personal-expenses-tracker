@@ -82,18 +82,18 @@ export function DangerZoneTab() {
   }
 
   return (
-    <Card className="border-destructive/50">
+    <Card className="ring-1 ring-destructive/35">
       <CardHeader>
         <CardTitle className="text-destructive">{t("settings.danger.title")}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <p className="text-sm text-muted-foreground">
           {t("settings.danger.description")}{" "}
-          <code className="rounded bg-muted px-1 py-0.5 text-xs">data/backups/</code>
+          <code className="rounded-md bg-elevated px-1.5 py-0.5 text-xs">data/backups/</code>
           {t("settings.danger.descriptionSuffix")}
         </p>
 
-        <label className="flex items-center gap-2 border-b pb-2 text-sm font-medium">
+        <label className="flex items-center gap-2 border-b border-hairline pb-2 text-sm font-medium">
           <Checkbox checked={allSelected} onCheckedChange={(c) => toggleAll(c === true)} />
           {t("settings.danger.selectAll")}
         </label>

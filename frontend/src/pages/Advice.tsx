@@ -3,6 +3,7 @@ import { useState } from "react"
 import { toast } from "sonner"
 
 import { useAccounts, useAdvice } from "@/api/hooks"
+import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -55,14 +56,11 @@ export function Advice() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">{t("advice.title")}</h1>
-        <p className="text-sm text-muted-foreground">{t("advice.subtitle")}</p>
-      </div>
+      <PageHeader title={t("advice.title")} subtitle={t("advice.subtitle")} />
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">{t("advice.period")}</CardTitle>
+          <CardTitle>{t("advice.period")}</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <div className="flex flex-wrap items-center gap-2">
@@ -122,28 +120,35 @@ export function Advice() {
           </div>
 
           <Button onClick={runAnalysis} disabled={advice.isPending} className="w-fit">
-            <Sparkles className="mr-1.5 size-4" />
+            <Sparkles className="size-4" />
             {advice.isPending ? t("advice.analyzing") : t("advice.startAnalysis")}
           </Button>
         </CardContent>
       </Card>
 
-      {advice.isPending && <p className="text-sm text-muted-foreground">{t("advice.analyzingHint")}</p>}
+      {advice.isPending && (
+        <p className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Sparkles className="size-4 animate-pulse text-primary" />
+          {t("advice.analyzingHint")}
+        </p>
+      )}
 
       {advice.data && (
-        <Card className="border-primary/20">
+        <Card className="ring-1 ring-primary/25">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Lightbulb className="size-4 text-primary" />
+            <CardTitle className="flex items-center gap-2.5">
+              <span className="flex size-7 items-center justify-center rounded-[8px] bg-[#ff9500] text-white">
+                <Lightbulb className="size-4" />
+              </span>
               {advice.data.period_label}
             </CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
-            <p className="text-sm leading-relaxed">{advice.data.summary}</p>
+            <p className="max-w-[72ch] text-[15px] leading-relaxed">{advice.data.summary}</p>
             {advice.data.items.length > 0 && (
               <ul className="flex flex-col gap-3">
                 {advice.data.items.map((item, i) => (
-                  <li key={i} className="rounded-lg border bg-muted/30 p-3">
+                  <li key={i} className="rounded-xl bg-elevated/60 px-4 py-3">
                     <p className="text-sm font-medium">{item.title}</p>
                     <p className="mt-0.5 text-sm text-muted-foreground">{item.detail}</p>
                   </li>

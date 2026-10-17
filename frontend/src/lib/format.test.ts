@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { deltaPercent, formatDate, formatMoney, formatPercent, monthName } from "./format"
+import { deltaPercent, formatAmount, formatDate, formatMoney, formatPercent, monthName } from "./format"
 
 describe("formatMoney", () => {
   it("formats positive cents in Italian style", () => {
@@ -68,5 +68,13 @@ describe("deltaPercent", () => {
 
   it("returns null when the previous value is zero", () => {
     expect(deltaPercent(100, 0)).toBeNull()
+  })
+})
+
+describe("formatAmount", () => {
+  it("drops the currency and rounds to whole units", () => {
+    expect(formatAmount(306677, "en")).toBe("3,067")
+    expect(formatAmount(-95000, "it")).toBe("-950")
+    expect(formatAmount(1234567, "it")).toBe("12.346")
   })
 })
